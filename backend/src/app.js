@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const db = require('./models');
 
 const userRoutes = require('./routes/user');
@@ -12,8 +13,16 @@ const categoryRoutes = require('./routes/category');
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(cors({
+    origin: 'http://localhost:8080',
+    credentials: true
+}));
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+
 
 app.get('/', (req, res) => res.send('Bonjour de l\'API Mecascrap !'));
 app.use('/users', userRoutes);
