@@ -17,6 +17,16 @@ Object.keys(db).forEach(modelName => {
     }
 });
 
+db.Product.belongsTo(db.Category, {
+    foreignKey: 'categoryId',
+    onDelete: 'CASCADE',
+});
+
+db.Category.hasMany(db.Product, {
+    foreignKey: 'categoryId'
+});
+
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
