@@ -35,6 +35,12 @@ module.exports = (sequelize) => {
                     max: 320,
                 },
             },
+            role: {
+                type: DataTypes.ENUM,
+                values: ['admin', 'user', 'accountant'],
+                defaultValue: 'user',
+                allowNull: false
+            },
         },
         {
             sequelize,

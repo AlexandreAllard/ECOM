@@ -53,20 +53,29 @@ exports.updateUser = async (req, res, next) => {
             return res.status(422).json({ errors: errors.array() });
         }
 
-        const { email, password, firstname, lastname } = req.body;
-        const [updatedRows] = await User.update(
-            { email, password, firstname, lastname },
-            { where: { id: req.params.id } }
-        );
-        if (updatedRows === 0) {
+        const { email, password, firstname, lastname, role } = req.body;
+        const userToUpdate = await User.findByPk(req.params.id);
+
+        if (!userToUpdate) {
             return res.sendStatus(404);
         }
+
+        if (role && req.user.role === 'admin') {
+            userToUpdate.role = role;
+        }
+
+        userToUpdate.email = email;
+        userToUpdate.password = password;
+        userToUpdate.firstname = firstname;
+        userToUpdate.lastname = lastname;
+
+        await userToUpdate.save();
+
         res.sendStatus(200);
     } catch (error) {
         next(error);
     }
 };
-
 exports.deleteUser = async (req, res, next) => {
     try {
         const deletedRows = await User.destroy({ where: { id: req.params.id } });

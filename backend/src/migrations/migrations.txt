@@ -1,0 +1,4 @@
+cd /backend/src
+npx sequelize-cli migration:generate --name add-role-to-user
+docker exec -it -w /app backend npx sequelize-cli db:migrate
+
