@@ -1,4 +1,3 @@
-// store/auth.js
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
@@ -16,17 +15,45 @@ export const useAuthStore = defineStore('auth', {
                 this.token = token;
                 this.isLoggedIn = true;
                 axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                this.validateToken();
             } else {
-                this.isLoggedIn = false;
-                this.token = null;
+                this.resetAuth();
             }
+        },
+        validateToken() {
+            if (!this.token) {
+                this.resetAuth();
+                return Promise.reject("No token found");
+            }
+            return axios.post('http://localhost:3000/auth/validate-token', { token: this.token })
+                .then(response => {
+                    this.isLoggedIn = true;
+                    this.user = response.data.user;
+                    this.role = response.data.user.role;
+                    return response.data;
+                })
+                .catch(error => {
+                    this.resetAuth();
+                    return Promise.reject(error);
+                });
+        },
+        resetAuth() {
+            this.isLoggedIn = false;
+            this.token = null;
+            this.user = null;
+            this.role = null;
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            delete axios.defaults.headers.common['Authorization'];
         },
         login(credentials) {
             return axios.post('http://localhost:3000/auth/login', credentials)
                 .then(response => {
                     this.token = response.data.token;
                     this.isLoggedIn = true;
+                    this.role = response.data.user.role;
                     localStorage.setItem('token', this.token);
+                    localStorage.setItem('role', this.role);
                     axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
                     return null;
                 })
@@ -36,10 +63,7 @@ export const useAuthStore = defineStore('auth', {
                 });
         },
         logout() {
-            this.isLoggedIn = false;
-            this.token = null;
-            localStorage.removeItem('token');
-            delete axios.defaults.headers.common['Authorization'];
+            this.resetAuth();
         }
     }
 });
