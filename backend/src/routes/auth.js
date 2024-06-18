@@ -14,12 +14,13 @@ router.post('/login',
 
 router.post('/logout', authMiddleware, authController.logout);
 
-router.post('/validate-token', async (req, res) => {
-    const token = req.body.token;
-
+router.get('/validate-token', async (req, res) => {
+    console.log(req.cookies);
+    const token = req.cookies.jwt;
     if (!token) {
         return res.status(401).send({ message: "No token provided" });
     }
+
 
     try {
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
@@ -46,6 +47,5 @@ router.post('/validate-token', async (req, res) => {
         }
     }
 });
-
 
 module.exports = router;

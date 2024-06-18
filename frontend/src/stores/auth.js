@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', {
                 this.resetAuth();
                 return Promise.reject("No token found");
             }
-            return axios.post('http://localhost:3000/auth/validate-token', { token: this.token })
+            return axios.get('http://localhost:3000/auth/validate-token', { withCredentials: true })
                 .then(response => {
                     this.isLoggedIn = true;
                     this.user = response.data.user;
