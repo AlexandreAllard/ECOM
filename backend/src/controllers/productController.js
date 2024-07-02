@@ -3,9 +3,23 @@ const { validationResult } = require('express-validator');
 
 exports.getAllProducts = async (req, res, next) => {
     try {
-        const products = await Product.findAll({ include: Category });
+        const categoryId = req.query.categoryId;
+        console.log("categoryId:", categoryId);
+        const options = {
+            include: [{
+                model: Category,
+                as: 'category'
+            }]
+        };
+
+        if (categoryId) {
+            options.where = { categoryId: categoryId };
+        }
+
+        const products = await Product.findAll(options);
         res.json(products);
     } catch (error) {
+        console.error("Failed to fetch products:", error);
         next(error);
     }
 };
@@ -27,7 +41,12 @@ exports.createProduct = async (req, res, next) => {
 
 exports.getProduct = async (req, res, next) => {
     try {
-        const product = await Product.findByPk(req.params.id, { include: Category });
+        const product = await Product.findByPk(req.params.id, {
+            include: [{
+                model: Category,
+                as: 'category'
+            }]
+        });
         if (!product) {
             return res.sendStatus(404);
         }
@@ -44,14 +63,21 @@ exports.updateProduct = async (req, res, next) => {
             return res.status(422).json({ errors: errors.array() });
         }
 
-        const { name, description, price, stock, imageUrl, categoryId } = req.body;
-        const [updatedRows] = await Product.update(
-            { name, description, price, stock, imageUrl, categoryId },
-            { where: { id: req.params.id } }
-        );
-        if (updatedRows === 0) {
+        const product = await Product.findByPk(req.params.id);
+        if (!product) {
             return res.sendStatus(404);
         }
+
+        const { name, description, price, stock, imageUrl, categoryId } = req.body;
+        const fieldsToUpdate = {};
+        if (name !== undefined) fieldsToUpdate.name = name;
+        if (description !== undefined) fieldsToUpdate.description = description;
+        if (price !== undefined) fieldsToUpdate.price = price;
+        if (stock !== undefined) fieldsToUpdate.stock = stock;
+        if (imageUrl !== undefined) fieldsToUpdate.imageUrl = imageUrl;
+        if (categoryId !== undefined) fieldsToUpdate.categoryId = categoryId;
+
+        await product.update(fieldsToUpdate);
         res.sendStatus(200);
     } catch (error) {
         next(error);

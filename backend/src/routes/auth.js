@@ -4,6 +4,7 @@ const authController = require('../controllers/authController');
 const { body } = require('express-validator');
 const authMiddleware = require("../middleware/authMiddleware");
 const jwt = require('jsonwebtoken');
+const userController = require("../controllers/userController");
 const User = require('../models').User;
 
 router.post('/login',
@@ -48,3 +49,4 @@ router.get('/validate-token', async (req, res) => {
 });
 
 module.exports = router;
+

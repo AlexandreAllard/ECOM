@@ -44,15 +44,17 @@ exports.updateCategory = async (req, res, next) => {
             return res.status(422).json({ errors: errors.array() });
         }
 
-        const { name } = req.body;
-        const [updatedRows] = await Category.update(
-            { name },
-            { where: { id: req.params.id } }
-        );
-        if (updatedRows === 0) {
+        const { name, description } = req.body;
+        const categoryToUpdate = await Category.findByPk(req.params.id);
+        if (!categoryToUpdate) {
             return res.sendStatus(404);
         }
-        res.sendStatus(200);
+
+        if (name !== undefined) categoryToUpdate.name = name;
+        if (description !== undefined) categoryToUpdate.description = description;
+
+        await categoryToUpdate.save();
+        res.json(categoryToUpdate);
     } catch (error) {
         next(error);
     }

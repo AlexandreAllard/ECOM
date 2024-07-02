@@ -1,9 +1,19 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link v-if="!isLoggedIn" to="/login">Login</router-link>
-    <router-link v-if="role === 'admin'" to="/admin">Admin</router-link>
-    <button v-if="isLoggedIn" @click="logout">Logout</button>
+  <nav class="bg-gray-800 text-white p-4">
+    <div class="container mx-auto flex flex-wrap items-center justify-between">
+      <router-link class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/">Home</router-link>
+      <router-link v-if="!isLoggedIn" class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/login">Login</router-link>
+      <div v-if="role === 'admin'" class="flex">
+        <router-link class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/admin">Admin</router-link>
+        <router-link class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/adminusers">Users</router-link>
+        <router-link class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/admincategories">Categories</router-link>
+        <router-link class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/adminproducts">Products</router-link>
+      </div>
+      <router-link v-if="isLoggedIn" class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/profile">Profile</router-link>
+      <router-link v-if="isLoggedIn" class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/produits">Produits</router-link>
+      <router-link v-if="isLoggedIn" class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/cart">Cart</router-link>
+      <button v-if="isLoggedIn" class="logout-button py-2 px-4 bg-red-600 hover:bg-red-700 rounded" @click="logout">Logout</button>
+    </div>
   </nav>
 </template>
 

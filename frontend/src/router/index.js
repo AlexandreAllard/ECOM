@@ -21,10 +21,44 @@ const routes = [
     {
         path: '/admin',
         name: 'Admin',
-        component: () => import('../views/Admin.vue'),
+        component: () => import('../views/admin/Admin.vue'),
         meta: {requiresAuth: true, requiresRole: 'admin'}
     },
+    {
+        path: '/produits',
+        name: 'Produits',
+        component: () => import('../views/Products.vue'),
 
+    },
+    {
+        path: '/adminusers',
+        name: 'AdminUsers',
+        component: () => import('../views/admin/AdminUsers.vue'),
+        meta: {requiresAuth: true, requiresRole: 'admin'}
+    },
+    {
+        path: '/admincategories',
+        name: 'AdminCategories',
+        component: () => import('../views/admin/AdminCategories.vue'),
+        meta: {requiresAuth: true, requiresRole: 'admin'}
+    },
+    {
+        path: '/adminproducts',
+        name: 'AdminProducts',
+        component: () => import('../views/admin/AdminProducts.vue'),
+        meta: {requiresAuth: true, requiresRole: 'admin'}
+    },
+    {
+        path: '/cart',
+        name: 'Cart',
+        component: () => import('../views/Cart.vue'),
+        meta: {requiresAuth: true}
+    },
+    {
+        path: '/product/:id',
+        name: 'ProductDetails',
+        component: () => import('../views/ProductDetails.vue')
+    }
 ];
 
 const router = createRouter({
@@ -38,12 +72,12 @@ router.beforeEach(async (to, from, next) => {
         try {
             await auth.validateToken();
             if (to.matched.some(record => record.meta.requiresRole && auth.role !== record.meta.requiresRole)) {
-                next({ name: 'Home' });
+                next({name: 'Home'});
             } else {
                 next();
             }
         } catch (error) {
-            next({ name: 'Login' });
+            next({name: 'Login'});
         }
     } else {
         next();
