@@ -10,21 +10,29 @@ exports.login = async (req, res, next) => {
             return res.status(422).json({errors: errors.array()});
         }
 
-        const {email, password} = req.body;
+        const { email, password } = req.body;
+        const user = await User.findOne({ where: { email } });
 
-        const user = await User.findOne({where: {email}});
-        if (!user || !(await user.checkPassword(password))) {
-            return res.status(401).json({message: 'Email ou mot de passe incorrect'});
+        if (!user) {
+            return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
         }
 
-        const token = jwt.sign({userId: user.id, role: user.role}, process.env.JWT_SECRET, {expiresIn: '2h'});
+        if (!(await user.checkPassword(password))) {
+            return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
+        }
+
+        if (!user.isVerified) {
+            return res.status(401).json({ message: 'Compte non vérifié. Veuillez vérifier votre email.' });
+        }
+
+        const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '2h' });
         res.cookie('jwt', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'Strict',
             maxAge: 3600000
         });
-        return res.json({user, token});
+        return res.json({ user, token });
     } catch (error) {
         next(error);
     }

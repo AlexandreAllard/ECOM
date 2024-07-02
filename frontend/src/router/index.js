@@ -19,34 +19,51 @@ const routes = [
         meta: {requiresAuth: true}
     },
     {
-        path: '/admin',
-        name: 'Admin',
-        component: () => import('../views/admin/Admin.vue'),
-        meta: {requiresAuth: true, requiresRole: 'admin'}
-    },
-    {
         path: '/produits',
         name: 'Produits',
         component: () => import('../views/Products.vue'),
-
     },
     {
-        path: '/adminusers',
-        name: 'AdminUsers',
-        component: () => import('../views/admin/AdminUsers.vue'),
-        meta: {requiresAuth: true, requiresRole: 'admin'}
+        path: '/admin',
+        component: () => import('../views/admin/Admin.vue'),
+        meta: {requiresAuth: true, requiresRole: 'admin'},
+        children: [
+            {
+                path: 'users',
+                name: 'AdminUsers',
+                component: () => import('../views/admin/AdminUsers.vue')
+            },
+            {
+                path: 'categories',
+                name: 'AdminCategories',
+                component: () => import('../views/admin/AdminCategories.vue')
+            },
+            {
+                path: 'products',
+                name: 'AdminProducts',
+                component: () => import('../views/admin/AdminProducts.vue')
+            },
+        ]
     },
     {
-        path: '/admincategories',
-        name: 'AdminCategories',
-        component: () => import('../views/admin/AdminCategories.vue'),
-        meta: {requiresAuth: true, requiresRole: 'admin'}
+        path: '/activate/:token',
+        name: 'ActivateAccount',
+        component: () => import('../views/ActivateAccount.vue')
     },
     {
-        path: '/adminproducts',
-        name: 'AdminProducts',
-        component: () => import('../views/admin/AdminProducts.vue'),
-        meta: {requiresAuth: true, requiresRole: 'admin'}
+        path:'/resend-verification',
+        name: 'ResendVerification',
+        component: () => import('../views/ResendVerification.vue')
+    },
+    {
+        path:'/reset-password-request',
+        name: 'ResetPasswordRequest',
+        component: () => import('../views/RequestResetPassword.vue')
+    },
+    {
+        path:'/reset-password/:token',
+        name: 'ResetPassword',
+        component: () => import('../views/ResetPassword.vue')
     },
     {
         path: '/cart',
@@ -58,6 +75,16 @@ const routes = [
         path: '/product/:id',
         name: 'ProductDetails',
         component: () => import('../views/ProductDetails.vue')
+    },
+    {
+        path: '/stock-management',
+        name: 'StockManagement',
+        component: () => import('../views/StockManagement.vue'),
+    },
+    {
+        path: '/stock-history',
+        name: 'GlobalStockHistory',
+        component: () => import('../views/GlobalStockHistory.vue'),
     }
 ];
 

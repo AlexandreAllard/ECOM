@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require('path');
-const { Sequelize, sequelize } = require('../config/db');
+const {Sequelize, sequelize} = require('../config/db');
 
 const db = {};
 
@@ -25,6 +25,16 @@ db.Category.hasMany(db.Product, {
 db.Product.belongsTo(db.Category, {
     foreignKey: 'categoryId',
     as: 'category'
+});
+
+db.Product.hasMany(db.StockAdjustment, {
+    foreignKey: 'productId',
+    as: 'adjustments'
+});
+
+db.StockAdjustment.belongsTo(db.Product, {
+    foreignKey: 'productId',
+    as: 'product'
 });
 
 db.User.hasOne(db.Cart, {

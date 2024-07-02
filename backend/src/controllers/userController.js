@@ -1,15 +1,9 @@
-const { User, Cart } = require('../models');  // Assurez-vous que le modèle Cart est importé
-const { validationResult } = require('express-validator');
-const { v4: uuidv4 } = require('uuid');
-
-exports.getAllUsers = async (req, res, next) => {
-    try {
-        const users = await User.findAll();
-        res.json(users);
-    } catch (error) {
-        next(error);
-    }
-};
+const {User, Cart} = require('../models');
+const {validationResult} = require('express-validator');
+const {v4: uuidv4} = require('uuid');
+const emailService = require('../services/emailService');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 exports.createUser = async (req, res, next) => {
     const transaction = await User.sequelize.transaction();
@@ -17,25 +11,115 @@ exports.createUser = async (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             await transaction.rollback();
-            return res.status(422).json({ errors: errors.array() });
+            return res.status(422).json({errors: errors.array()});
         }
 
-        const { email, password, firstname, lastname } = req.body;
-        const id = uuidv4();
+        const {email, password, firstname, lastname} = req.body;
+        const hashedPassword = await bcrypt.hash(password, 12);
+        const verificationToken = jwt.sign({email}, process.env.JWT_SECRET, {expiresIn: '24h'});
 
         const user = await User.create({
-            id, email, password, firstname, lastname
-        }, { transaction });
+            email,
+            password: hashedPassword,
+            firstname,
+            lastname,
+            verificationToken
+        }, {transaction});
 
-        await Cart.create({ userId: user.id }, { transaction });
-
+        await Cart.create({userId: user.id}, {transaction});
         await transaction.commit();
-        res.status(201).json(user);
+
+        await emailService.sendVerificationEmail(firstname, verificationToken, 'alrdalexandre@gmail.com');
+        res.status(201).json({message: 'Utilisateur créé ! Vérifiez votre email pour activer votre compte.'});
     } catch (error) {
         await transaction.rollback();
         if (error.name === 'SequelizeUniqueConstraintError') {
-            return res.status(409).json({ message: 'Email déjà utilisé' });
+            return res.status(409).json({message: 'Email déjà utilisé'});
         }
+        next(error);
+    }
+};
+
+exports.activateAccount = async (req, res) => {
+    const {token} = req.params;
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const user = await User.findOne({where: {email: decoded.email}});
+
+        if (!user) {
+            return res.status(404).json({message: 'Utilisateur non trouvé.'});
+        }
+
+        user.isVerified = true;
+        await user.save();
+
+        res.json({message: 'Compte activé avec succès.'});
+    } catch (error) {
+        res.status(400).json({message: 'Lien de vérification invalide ou expiré.'});
+    }
+};
+
+exports.resendVerificationEmail = async (req, res) => {
+    try {
+        const {email} = req.body;
+
+        const user = await User.findOne({where: {email, isVerified: false}});
+        if (!user) {
+            return res.status(404).json({message: "Aucun utilisateur non vérifié trouvé avec cet email."});
+        }
+
+        const verificationToken = jwt.sign({email: user.email}, process.env.JWT_SECRET, {expiresIn: '24h'});
+        await user.save();
+
+        await emailService.sendVerificationEmail(user.firstname, verificationToken, 'alrdalexandre@gmail.com');
+        res.json({message: "Email de vérification renvoyé. Veuillez vérifier votre boîte de réception."});
+    } catch (error) {
+        console.error("Error resending verification email:", error);
+        res.status(500).json({message: "Erreur lors de la régénération du code de vérification."});
+    }
+};
+
+exports.requestResetPassword = async (req, res) => {
+    const {email} = req.body;
+    try {
+        const user = await User.findOne({where: {email}});
+        if (!user) {
+            return res.status(404).json({message: "Aucun utilisateur trouvé avec cet email."});
+        }
+
+        const resetToken = jwt.sign({userId: user.id}, process.env.JWT_SECRET, {expiresIn: '1h'});
+        await emailService.sendPasswordResetEmail(user.firstname, resetToken, 'alrdalexandre@gmail.com');
+        res.json({message: "Email de réinitialisation de mot de passe envoyé."});
+    } catch (error) {
+        res.status(500).json({message: "Erreur lors de la demande de réinitialisation du mot de passe."});
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findByPk(decoded.userId);
+        if (!user) {
+            return res.status(404).json({ message: "Utilisateur non trouvé." });
+        }
+
+        user.password = newPassword;
+        await user.save();
+        res.json({ message: "Mot de passe réinitialisé avec succès." });
+    } catch (error) {
+        res.status(400).json({ message: "Lien de réinitialisation invalide ou expiré." });
+    }
+};
+
+exports.getAllUsers = async (req, res, next) => {
+    try {
+        const users = await User.findAll();
+        res.json(users);
+    } catch (error) {
         next(error);
     }
 };
@@ -68,7 +152,7 @@ exports.updateUser = async (req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
+            return res.status(422).json({errors: errors.array()});
         }
 
         const userToUpdate = await User.findByPk(req.params.id);
@@ -94,7 +178,7 @@ exports.updateUser = async (req, res, next) => {
 
 exports.deleteUser = async (req, res, next) => {
     try {
-        const deletedRows = await User.destroy({ where: { id: req.params.id } });
+        const deletedRows = await User.destroy({where: {id: req.params.id}});
         if (deletedRows === 0) {
             return res.sendStatus(404);
         }
@@ -107,12 +191,12 @@ exports.deleteUser = async (req, res, next) => {
 exports.getCurrentUser = async (req, res, next) => {
     try {
         if (!req.user || !req.user.id) {
-            return res.status(401).json({ message: "Aucun utilisateur authentifié." });
+            return res.status(401).json({message: "Aucun utilisateur authentifié."});
         }
 
         const user = await User.findByPk(req.user.id);
         if (!user) {
-            return res.status(404).json({ message: "Utilisateur non trouvé." });
+            return res.status(404).json({message: "Utilisateur non trouvé."});
         }
 
         res.json(user);
@@ -124,7 +208,7 @@ exports.getCurrentUser = async (req, res, next) => {
 exports.alterCurrentUser = async (req, res, next) => {
     try {
         if (!req.user || !req.user.id) {
-            return res.status(401).json({ message: "Aucun utilisateur authentifié." });
+            return res.status(401).json({message: "Aucun utilisateur authentifié."});
         }
 
         const userToUpdate = await User.findByPk(req.user.id);
