@@ -59,4 +59,18 @@ async function sendLockedWarningEmail(userName) {
     }
 }
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendLockedWarningEmail};
+async function sendSubscriptionNotificationEmail(firstName, email, subject, message) {
+    try {
+        await resend.emails.send({
+            from: 'onboarding@resend.dev',
+            to: 'alrdalexandre@gmail.com',
+            subject: subject,
+            text: `Bonjour ${firstName},\n\n${message}`,
+        });
+        console.log('Email sent successfully to ' + email);
+    } catch (error) {
+        console.error('Failed to send email to ' + email, error);
+    }
+}
+
+module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendLockedWarningEmail, sendSubscriptionNotificationEmail, };

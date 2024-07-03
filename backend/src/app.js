@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/product');
 const categoryRoutes = require('./routes/category');
 const cartRoutes = require('./routes/cart');
+const subscriptionRoutes = require('./routes/subscription');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -33,7 +34,7 @@ app.use('/auth', authRoutes);
 app.use('/products', productRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/cart', cartRoutes);
-
+app.use('/subscriptions', subscriptionRoutes);
 app.use((err, req, res, next) => {
     console.error(err.stack);
     const statusCode = err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError' ? 422 : 500;

@@ -1,6 +1,7 @@
 const {Product, Category, User} = require('../models');
 const {validationResult} = require('express-validator');
 const {StockAdjustment} = require('../models');
+const SubscriptionController = require('./subscriptionController');
 
 exports.getAllProducts = async (req, res, next) => {
     try {
@@ -29,14 +30,21 @@ exports.createProduct = async (req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(422).json({errors: errors.array()});
+            return res.status(422).json({ errors: errors.array() });
         }
 
-        const {name, description, price, stock, imageUrl, categoryId} = req.body;
-        const product = await Product.create({name, description, price, stock, imageUrl, categoryId});
+        const { name, description, price, stock, imageUrl, categoryId } = req.body;
+        const product = await Product.create({ name, description, price, stock, imageUrl, categoryId });
+
+        SubscriptionController.notifyUsersBySubscriptionType('new_product', categoryId, {
+            subject: `Nouveau produit ajouté dans votre catégorie suivie`,
+            message: `Découvrez notre nouveau produit: ${name}!`
+        });
+
         res.status(201).json(product);
     } catch (error) {
-        next(error);
+        console.error("Error creating product:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -70,15 +78,21 @@ exports.updateProduct = async (req, res, next) => {
         }
 
         const {name, description, price, stock, imageUrl, categoryId} = req.body;
-        const fieldsToUpdate = {};
-        if (name !== undefined) fieldsToUpdate.name = name;
-        if (description !== undefined) fieldsToUpdate.description = description;
-        if (price !== undefined) fieldsToUpdate.price = price;
-        if (stock !== undefined) fieldsToUpdate.stock = stock;
-        if (imageUrl !== undefined) fieldsToUpdate.imageUrl = imageUrl;
-        if (categoryId !== undefined) fieldsToUpdate.categoryId = categoryId;
+        const oldPrice = product.price;
+        const fieldsToUpdate = {name, description, price, stock, imageUrl, categoryId};
 
         await product.update(fieldsToUpdate);
+
+
+        if (price < oldPrice) {
+            SubscriptionController.notifyUsersBySubscriptionType('price_change', product.id, {
+                subject: `Baisse de prix pour ${product.name}`,
+                message: `Le prix de ${product.name} a baissé de ${oldPrice} à ${price}.`
+            });
+        } else {
+            console.log(`No price decrease for ${product.name}, no notification sent.`);
+        }
+
         res.sendStatus(200);
     } catch (error) {
         next(error);
@@ -112,6 +126,7 @@ exports.updateProductStock = async (req, res) => {
             return res.status(404).json({ message: "Produit non trouvé." });
         }
 
+        const wasOutOfStock = product.stock <= 0;
         product.stock += parsedAdjustment;
         await product.save();
 
@@ -121,7 +136,14 @@ exports.updateProductStock = async (req, res) => {
             justification
         });
 
-        res.json({ message: "Stock mis à jour avec succès." });
+        if (wasOutOfStock && product.stock > 0) {
+            SubscriptionController.notifyUsersBySubscriptionType('stock_change', productId, {
+                subject: `Réassort du produit ${product.name}`,
+                message: `Le produit ${product.name} est de nouveau en stock!`
+            });
+        }
+
+        res.json({ message: "Stock mis à jour avec succès.", product });
     } catch (error) {
         console.error("Erreur lors de la mise à jour du stock :", error);
         res.status(500).json({ message: "Erreur serveur lors de la mise à jour du stock." });

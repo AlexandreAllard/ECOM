@@ -58,7 +58,7 @@ export default {
         });
         products.value = response.data.map(product => ({
           ...product,
-          quantity: 1  // Initialize quantity with 1
+          quantity: 1
         }));
       } catch (error) {
         console.error("Erreur lors du chargement des produits:", error);

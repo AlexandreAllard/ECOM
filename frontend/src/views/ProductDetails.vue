@@ -1,13 +1,21 @@
 <template>
-  <div v-if="product" class="p-6">
-    <h1 class="text-2xl font-bold">{{ product.name }}</h1>
-    <p class="my-2">{{ product.description }}</p>
-    <p class="font-semibold">Price: ${{ product.price }}</p>
-    <button @click="addToCart(product.id, 1)" class="mt-3 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-      Add to Cart
-    </button>
+  <div v-if="product" class="max-w-2xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-4">{{ product.name }}</h1>
+    <p class="text-gray-700 text-lg mb-2">{{ product.description }}</p>
+    <p class="text-xl font-semibold mb-4">Price: ${{ product.price }}</p>
+    <div class="flex space-x-4 mb-6">
+      <button @click="addToCart(product.id, 1)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+        Add to Cart
+      </button>
+      <button @click="subscribeToPriceChange(product.id)" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+        Subscribe to Price Alerts
+      </button>
+      <button @click="subscribeToRestock(product.id)" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition duration-200">
+        Subscribe to Restock Alerts
+      </button>
+    </div>
   </div>
-  <div v-else class="p-6">
+  <div v-else class="p-6 text-center">
     <p>Loading product details...</p>
   </div>
 </template>
@@ -44,6 +52,32 @@ export default {
           .catch(error => {
             console.error("Error adding product to cart:", error);
             alert("Failed to add product to cart");
+          });
+    },
+    subscribeToPriceChange(productId) {
+      axios.post('http://localhost:3000/subscriptions', {
+        targetId: productId,
+        type: 'price_change'
+      }, {withCredentials: true})
+          .then(() => {
+            alert("Subscribed to price change alerts!");
+          })
+          .catch(error => {
+            console.error("Error subscribing to price change alerts:", error);
+            alert("Failed to subscribe to price change alerts");
+          });
+    },
+    subscribeToRestock(productId) {
+      axios.post('http://localhost:3000/subscriptions', {
+        targetId: productId,
+        type: 'stock_change'
+      }, {withCredentials: true})
+          .then(() => {
+            alert("Subscribed to restock alerts!");
+          })
+          .catch(error => {
+            console.error("Error subscribing to restock alerts:", error);
+            alert("Failed to subscribe to restock alerts");
           });
     }
   },
