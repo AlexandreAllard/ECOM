@@ -11,6 +11,8 @@ const productRoutes = require('./routes/product');
 const categoryRoutes = require('./routes/category');
 const cartRoutes = require('./routes/cart');
 const subscriptionRoutes = require('./routes/subscription');
+const paymentRoutes = require('./routes/payment');
+const orderRoutes = require('./routes/order');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -23,9 +25,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
-
 
 
 app.get('/', (req, res) => res.send('Bonjour de l\'API Mecascrap !'));
@@ -35,11 +36,14 @@ app.use('/products', productRoutes);
 app.use('/categories', categoryRoutes);
 app.use('/cart', cartRoutes);
 app.use('/subscriptions', subscriptionRoutes);
+app.use('/payment', paymentRoutes);
+app.use('/orders', orderRoutes);
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     const statusCode = err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError' ? 422 : 500;
     const message = err.name === 'SequelizeUniqueConstraintError' ? 'Cette valeur est déjà utilisée.' : 'Erreur serveur';
-    res.status(statusCode).json({ message, errors: err.errors?.map(e => e.message) });
+    res.status(statusCode).json({message, errors: err.errors?.map(e => e.message)});
 });
 
 (async () => {

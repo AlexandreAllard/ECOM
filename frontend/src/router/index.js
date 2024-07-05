@@ -43,6 +43,11 @@ const routes = [
                 name: 'AdminProducts',
                 component: () => import('../views/admin/AdminProducts.vue')
             },
+            {
+                path: 'orders',
+                name: 'AdminOrders',
+                component: () => import('../views/admin/AdminOrders.vue')
+            }
         ]
     },
     {
@@ -85,6 +90,21 @@ const routes = [
         path: '/stock-history',
         name: 'GlobalStockHistory',
         component: () => import('../views/GlobalStockHistory.vue'),
+    },
+    {
+        path:'/payment',
+        name: 'Payment',
+        component: () => import('../views/Payment.vue'),
+    },
+    {
+        path:'/payment-success',
+        name: 'PaymentSuccess',
+        component: () => import('../views/PaymentSuccess.vue'),
+    },
+    {
+        path:'/orders',
+        name: 'Orders',
+        component: () => import('../views/Orders.vue'),
     }
 ];
 

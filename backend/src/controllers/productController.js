@@ -2,6 +2,7 @@ const {Product, Category, User} = require('../models');
 const {validationResult} = require('express-validator');
 const {StockAdjustment} = require('../models');
 const SubscriptionController = require('./subscriptionController');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 exports.getAllProducts = async (req, res, next) => {
     try {
@@ -34,14 +35,32 @@ exports.createProduct = async (req, res, next) => {
         }
 
         const { name, description, price, stock, imageUrl, categoryId } = req.body;
+
         const product = await Product.create({ name, description, price, stock, imageUrl, categoryId });
+
+        const stripeProduct = await stripe.products.create({
+            name,
+            description,
+            images: [imageUrl]
+        });
+
+        const stripePrice = await stripe.prices.create({
+            product: stripeProduct.id,
+            unit_amount: price * 100,
+            currency: 'eur'
+        });
 
         SubscriptionController.notifyUsersBySubscriptionType('new_product', categoryId, {
             subject: `Nouveau produit ajouté dans votre catégorie suivie`,
             message: `Découvrez notre nouveau produit: ${name}!`
         });
 
-        res.status(201).json(product);
+        res.status(201).json({
+            message: "Produit créé avec succès",
+            product: product,
+            stripeProductId: stripeProduct.id,
+            stripePriceId: stripePrice.id
+        });
     } catch (error) {
         console.error("Error creating product:", error);
         res.status(500).json({ message: "Internal server error" });

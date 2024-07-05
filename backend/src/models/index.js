@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require('path');
-const {Sequelize, sequelize} = require('../config/db');
+const { Sequelize, sequelize } = require('../config/db');
 
 const db = {};
 
@@ -17,7 +17,6 @@ Object.keys(db).forEach(modelName => {
     }
 });
 
-// Associations for Category and Product
 db.Category.hasMany(db.Product, {
     foreignKey: 'categoryId',
     as: 'products'
@@ -28,7 +27,6 @@ db.Product.belongsTo(db.Category, {
     as: 'category'
 });
 
-// Associations for Product and StockAdjustment
 db.Product.hasMany(db.StockAdjustment, {
     foreignKey: 'productId',
     as: 'adjustments'
@@ -39,7 +37,6 @@ db.StockAdjustment.belongsTo(db.Product, {
     as: 'product'
 });
 
-// Associations for User and Cart
 db.User.hasOne(db.Cart, {
     foreignKey: 'userId',
     as: 'cart'
@@ -50,7 +47,6 @@ db.Cart.belongsTo(db.User, {
     as: 'user'
 });
 
-// Associations for Cart and CartItem
 db.Cart.hasMany(db.CartItem, {
     foreignKey: 'cartId',
     as: 'items'
@@ -61,7 +57,6 @@ db.CartItem.belongsTo(db.Cart, {
     as: 'cart'
 });
 
-// Associations for Product and CartItem
 db.Product.hasMany(db.CartItem, {
     foreignKey: 'productId',
     as: 'cartItems'
@@ -87,6 +82,15 @@ db.Subscription.belongsTo(db.Product, {
     as: 'product'
 });
 
+db.User.hasMany(db.Order, {
+    foreignKey: 'userId',
+    as: 'orders'
+});
+
+db.Order.belongsTo(db.User, {
+    foreignKey: 'userId',
+    as: 'user'
+});
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
