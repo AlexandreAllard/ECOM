@@ -12,6 +12,9 @@
         </li>
       </ul>
       <div class="text-right font-bold mt-4">Total: {{ total }} €</div>
+      <div class="mt-4 flex justify-end">
+        <router-link to="/payment" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Procéder au paiement</router-link>
+      </div>
     </div>
     <div v-else class="text-center mt-4">
       <p>Votre panier est vide.</p>
@@ -41,7 +44,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import axios from 'axios';
 

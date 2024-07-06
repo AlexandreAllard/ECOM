@@ -32,7 +32,31 @@ module.exports = (sequelize) => {
                 allowNull: false,
                 validate: {
                     notEmpty: true,
-                    max: 320,
+                    isLongEnough(value) {
+                        if (value.length < 12) {
+                            throw new Error("Le mot de passe doit contenir au moins 12 caractères.");
+                        }
+                    },
+                    hasSymbols(value) {
+                        if (!/[!@#$%^&*(),.?":{}|<>]/g.test(value)) {
+                            throw new Error("Le mot de passe doit contenir des symboles.");
+                        }
+                    },
+                    hasNumber(value) {
+                        if (!/\d/g.test(value)) {
+                            throw new Error("Le mot de passe doit contenir des chiffres.");
+                        }
+                    },
+                    hasUpper(value) {
+                        if (!/[A-Z]/g.test(value)) {
+                            throw new Error("Le mot de passe doit contenir des majuscules.");
+                        }
+                    },
+                    hasLower(value) {
+                        if (!/[a-z]/g.test(value)) {
+                            throw new Error("Le mot de passe doit contenir des minuscules.");
+                        }
+                    },
                 },
             },
             role: {
@@ -45,6 +69,17 @@ module.exports = (sequelize) => {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false
             },
+            loginAttempts: {
+                type: DataTypes.INTEGER,
+                defaultValue: 0,
+            },
+            lockUntil: {
+                type: DataTypes.DATE,
+            },
+            lastPasswordChange: {
+                type: DataTypes.DATE,
+                defaultValue: DataTypes.NOW,
+            }
         },
         {
             sequelize,
@@ -57,6 +92,7 @@ module.exports = (sequelize) => {
         if (user.changed("password")) {
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(user.password, salt);
+            user.lastPasswordChange = new Date();
         }
     });
 

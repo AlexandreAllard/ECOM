@@ -28,6 +28,13 @@ module.exports = (sequelize) => {
                     isDecimal: true,
                 },
             },
+            brand: {
+                type: DataTypes.STRING(255),
+                allowNull: false,
+                validate: {
+                    notEmpty: true,
+                },
+            },
             stock: {
                 type: DataTypes.INTEGER,
                 allowNull: false,

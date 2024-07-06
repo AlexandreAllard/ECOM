@@ -96,9 +96,9 @@ exports.updateProduct = async (req, res, next) => {
             return res.sendStatus(404);
         }
 
-        const {name, description, price, stock, imageUrl, categoryId} = req.body;
+        const {name, description, price, stock, imageUrl, categoryId, brand} = req.body;
         const oldPrice = product.price;
-        const fieldsToUpdate = {name, description, price, stock, imageUrl, categoryId};
+        const fieldsToUpdate = {name, description, price, stock, imageUrl, categoryId, brand};
 
         await product.update(fieldsToUpdate);
 

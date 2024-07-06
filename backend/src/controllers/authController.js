@@ -17,13 +17,24 @@ exports.login = async (req, res, next) => {
             return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
         }
 
+        if (user.lockUntil && user.lockUntil > new Date()) {
+            return res.status(401).json({ message: 'Compte temporairement verrouillé. Veuillez réessayer plus tard.' });
+        }
+
         if (!(await user.checkPassword(password))) {
+            user.loginAttempts += 1;
+            if (user.loginAttempts >= 3) {
+                user.lockUntil = new Date(Date.now() + 20 * 60 * 1000);
+                await user.save();
+            } else {
+                await user.save();
+            }
             return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
         }
 
-        if (!user.isVerified) {
-            return res.status(401).json({ message: 'Compte non vérifié. Veuillez vérifier votre email.' });
-        }
+        user.loginAttempts = 0;
+        user.lockUntil = null;
+        await user.save();
 
         const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '2h' });
         res.cookie('jwt', token, {

@@ -12,6 +12,7 @@
           <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nom</th>
           <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Description</th>
           <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Prix</th>
+          <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Marque</th>
           <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Catégorie</th>
           <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
         </tr>
@@ -22,6 +23,7 @@
           <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ product.name }}</td>
           <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ product.description }}</td>
           <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ product.price }}</td>
+          <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ product.brand }}</td>
           <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">{{ product.categoryName }}</td>
           <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
             <button @click="() => openModal(product)" class="text-blue-500 hover:text-blue-800">Modifier</button>
@@ -48,6 +50,10 @@
           <div>
             <label for="price" class="block font-medium text-gray-700">{{ showModal ? 'Prix:' : 'Nouveau prix:' }}</label>
             <input id="price" type="number" v-model="formProduct.price" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-500">
+          </div>
+          <div>
+            <label for="brand" class="block font-medium text-gray-700">{{ showModal ? 'Marque:' : 'Nouvelle marque:' }}</label>
+            <input id="brand" type="text" v-model="formProduct.brand" required class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-500">
           </div>
           <div>
             <label for="category" class="block font-medium text-gray-700">{{ showModal ? 'Catégorie:' : 'Nouvelle catégorie:' }}</label>
@@ -80,7 +86,8 @@ export default {
         name: '',
         description: '',
         price: 0,
-        categoryId: ''
+        categoryId: '',
+        brand: ''
       }
     };
   },
@@ -107,7 +114,7 @@ export default {
           });
     },
     openModal(product) {
-      this.formProduct = {...product, categoryId: product.categoryId};
+      this.formProduct = {...product, categoryId: product.categoryId, brand: product.brand};
       this.showModal = true;
     },
     closeModal() {
@@ -124,7 +131,7 @@ export default {
           });
     },
     openAddModal() {
-      this.formProduct = { name: '', description: '', price: 0, categoryId: this.categories[0]?.id };
+      this.formProduct = { name: '', description: '', price: 0, categoryId: this.categories[0]?.id, brand: '' };
       this.showAddModal = true;
     },
     closeAddModal() {
@@ -157,5 +164,5 @@ export default {
   mounted() {
     this.fetchCategoriesAndProducts();
   }
-}
+};
 </script>

@@ -64,6 +64,7 @@ exports.finalizePayment = async (req, res) => {
         });
     }
 };
+
 async function createOrder(userId, paymentIntentId, transaction) {
     const cart = await Cart.findOne({ where: { userId }, transaction });
     if (!cart) {
@@ -108,6 +109,7 @@ async function createOrder(userId, paymentIntentId, transaction) {
         paymentIntentId
     }, { transaction });
 
+    await cart.destroy({ transaction });
     return order;
 }
 

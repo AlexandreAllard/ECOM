@@ -1,7 +1,9 @@
 <template>
   <div v-if="product" class="max-w-2xl mx-auto p-6">
     <h1 class="text-3xl font-bold mb-4">{{ product.name }}</h1>
+    <p class="text-gray-700 font-bold mb-2">{{ product.brand }}</p>
     <p class="text-gray-700 text-lg mb-2">{{ product.description }}</p>
+
     <p class="text-xl font-semibold mb-4">Price: ${{ product.price }}</p>
     <div class="flex space-x-4 mb-6">
       <button @click="addToCart(product.id, 1)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">

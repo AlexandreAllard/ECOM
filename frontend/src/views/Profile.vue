@@ -41,7 +41,7 @@
 
 <script>
 import axios from 'axios';
-import UserOrders from '../components/UserOrders.vue'; // Assurez-vous que le chemin d'accès est correct
+import UserOrders from '../components/UserOrders.vue';
 
 export default {
   name: 'Profile',

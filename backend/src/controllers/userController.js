@@ -15,12 +15,11 @@ exports.createUser = async (req, res, next) => {
         }
 
         const {email, password, firstname, lastname} = req.body;
-        const hashedPassword = await bcrypt.hash(password, 12);
         const verificationToken = jwt.sign({email}, process.env.JWT_SECRET, {expiresIn: '24h'});
 
         const user = await User.create({
             email,
-            password: hashedPassword,
+            password,
             firstname,
             lastname,
             verificationToken
@@ -177,13 +176,28 @@ exports.updateUser = async (req, res, next) => {
 };
 
 exports.deleteUser = async (req, res, next) => {
+    const userId = req.params.id;
     try {
-        const deletedRows = await User.destroy({where: {id: req.params.id}});
-        if (deletedRows === 0) {
-            return res.sendStatus(404);
+        const anonymousData = {
+            firstname: 'Deleted',
+            lastname: 'User',
+            email: `deleted-${Date.now()}@example.com`,
+            password: await bcrypt.hash(uuidv4(), 10),
+            isVerified: false
+        };
+
+        const result = await User.update(anonymousData, {
+            where: { id: userId }
+        });
+
+        if (result[0] === 0) {
+            return res.status(404).json({ message: "Utilisateur non trouvé." });
         }
-        res.sendStatus(204);
+
+        res.status(200).json({ message: "Compte utilisateur supprimé et données anonymisées." });
     } catch (error) {
+        console.error("Erreur lors de la suppression du compte utilisateur:", error);
+        res.status(500).json({ message: "Erreur interne du serveur lors de la tentative de suppression du compte utilisateur." });
         next(error);
     }
 };
