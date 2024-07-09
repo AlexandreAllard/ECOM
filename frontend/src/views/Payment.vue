@@ -43,7 +43,7 @@ export default {
       this.stripe = await this.stripePromise;
       const options = {
         clientSecret: this.clientSecret,
-        appearance: { /* options de personnalisation */ }
+        appearance: {}
       };
       this.elements = this.stripe.elements(options);
       this.paymentElement = this.elements.create("payment");

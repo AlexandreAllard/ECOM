@@ -85,6 +85,7 @@ const routes = [
         path: '/stock-management',
         name: 'StockManagement',
         component: () => import('../views/StockManagement.vue'),
+        meta: {requiresAuth: true, requiresRole: ['storekeeper', 'admin']},
     },
     {
         path: '/stock-history',
@@ -123,11 +124,15 @@ router.beforeEach(async (to, from, next) => {
     if (to.matched.some(record => record.meta.requiresAuth)) {
         try {
             await auth.validateToken();
-            if (to.matched.some(record => record.meta.requiresRole && auth.role !== record.meta.requiresRole)) {
-                next({name: 'Home'});
-            } else {
-                next();
+            const routeRequiresRoles = to.matched.some(record => record.meta.requiresRole);
+            if (routeRequiresRoles) {
+                const roles = to.matched.find(record => record.meta.requiresRole)?.meta.requiresRole || [];
+                if (!roles.includes(auth.role)) {
+                    next({name: 'Home'});
+                    return;
+                }
             }
+            next();
         } catch (error) {
             next({name: 'Login'});
         }

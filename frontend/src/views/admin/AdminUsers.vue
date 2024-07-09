@@ -59,7 +59,7 @@
                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-500">
           </div>
           <div>
-            <label for="firstname" class="block font-medium text-gray-700">Prénom:</label>
+            <label for="firstname" class="block font-medium text-gray-700">Prénom:</label
             <input type="text" id="firstname" v-model="selectedUser.firstname" required
                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-500">
           </div>
@@ -68,13 +68,23 @@
             <input type="text" id="lastname" v-model="selectedUser.lastname" required
                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-500">
           </div>
+          <div>
+            <label for="role" class="block font-medium text-gray-700">Rôle:</label>
+            <select id="role" v-model="selectedUser.role" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-500">
+              <option value="user">Utilisateur</option>
+              <option value="admin">Administrateur</option>
+              <option value="accountant">Comptable</option>
+              <option value="storekeeper">Magasinier</option>
+
+            </select>
+          </div>
           <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
             Enregistrer les modifications
           </button>
         </form>
       </div>
     </div>
-
     <div v-if="showAddModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-center">
       <div class="bg-white p-6 rounded-lg shadow-lg">
         <span class="close text-red-500 hover:text-red-700 cursor-pointer" @click="closeAddModal">&times;</span>
@@ -108,7 +118,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import axios from 'axios';
 
@@ -123,7 +132,8 @@ export default {
       newUser: {
         email: '',
         firstname: '',
-        lastname: ''
+        lastname: '',
+        password: ''
       }
     };
   },
@@ -187,3 +197,4 @@ export default {
   }
 }
 </script>
+
