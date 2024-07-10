@@ -1,4 +1,5 @@
 <template>
+  <AdminSidebar/>
   <div class="max-w-4xl mx-auto py-8 px-4">
     <h1 class="text-2xl font-bold mb-6 text-gray-800">Historique Global des Ajustements de Stock</h1>
     <div v-for="adjustment in adjustments" :key="adjustment.id" class="mb-4 p-4 bg-white rounded shadow">
@@ -23,8 +24,10 @@
 
 <script>
 import axios from 'axios';
+import AdminSidebar from "../../components/AdminSidebar.vue";
 
 export default {
+  components: {AdminSidebar},
   data() {
     return {
       adjustments: []
@@ -36,7 +39,7 @@ export default {
   methods: {
     async fetchGlobalAdjustments() {
       try {
-        const response = await axios.get('http://localhost:3000/products/stock-adjustments', { withCredentials: true });
+        const response = await axios.get('http://localhost:3000/products/stock-adjustments', {withCredentials: true});
         this.adjustments = response.data.map(adj => ({
           ...adj,
           productName: adj.product.name

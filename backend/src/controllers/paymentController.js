@@ -1,18 +1,23 @@
-const { Cart, CartItem, Product, Order, sequelize } = require('../models');
+const { Cart, CartItem, Product, Order, OrderItem, sequelize } = require('../models');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { getCartTotal, clearCart } = require('./cartController');
 
 async function createPaymentIntent(total, userId) {
-    return stripe.paymentIntents.create({
-        amount: Math.round(total * 100),
-        currency: 'eur',
-        payment_method_types: ['card'],
-        metadata: { userId }
-    });
+    try {
+        return await stripe.paymentIntents.create({
+            amount: Math.round(total * 100),
+            currency: 'eur',
+            payment_method_types: ['card'],
+            metadata: { userId }
+        });
+    } catch (error) {
+        console.error("Stripe PaymentIntent creation failed:", error);
+        throw error;
+    }
 }
 
 exports.createOrderAndProcessPayment = async (req, res) => {
-    const userId = req.user.id;
+    const { id: userId } = req.user || {};
 
     const userCart = await Cart.findOne({ where: { userId } });
     if (!userCart) {
@@ -24,16 +29,16 @@ exports.createOrderAndProcessPayment = async (req, res) => {
         return res.status(400).json({ message: "Le panier est vide ou le montant est invalide." });
     }
 
-    const paymentIntent = await createPaymentIntent(total, userId);
-    if (!paymentIntent) {
-        return res.status(500).json({ message: "Échec de la création de l'intention de paiement." });
+    try {
+        const paymentIntent = await createPaymentIntent(total, userId);
+        return res.status(201).json({
+            message: 'Intention de paiement créée avec succès',
+            clientSecret: paymentIntent.client_secret,
+            paymentIntentId: paymentIntent.id
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Échec de la création de l'intention de paiement.", error: error.message });
     }
-
-    return res.status(201).json({
-        message: 'Intention de paiement créée avec succès',
-        clientSecret: paymentIntent.client_secret,
-        paymentIntentId: paymentIntent.id
-    });
 };
 
 exports.finalizePayment = async (req, res) => {
@@ -66,14 +71,18 @@ exports.finalizePayment = async (req, res) => {
 };
 
 async function createOrder(userId, paymentIntentId, transaction) {
-    const cart = await Cart.findOne({ where: { userId }, transaction });
-    if (!cart) {
-        throw new Error('Cart not found.');
+    const userCart = await Cart.findOne({
+        where: { userId },
+        transaction
+    });
+
+    if (!userCart) {
+        throw new Error("Cart not found.");
     }
 
     const cartItems = await CartItem.findAll({
-        where: { cartId: cart.id },
-        include: [{ model: Product, as: 'product' }],
+        where: { cartId: userCart.id },
+        include: ['product'],
         transaction
     });
 
@@ -81,35 +90,25 @@ async function createOrder(userId, paymentIntentId, transaction) {
         throw new Error('No items in cart.');
     }
 
-    const orderDetails = [];
-    for (let item of cartItems) {
-        const product = item.product;
-        if (product.stock < item.quantity) {
-            throw new Error(`Not enough stock for product ${product.id}`);
-        }
-        product.stock -= item.quantity;
-        await product.save({ transaction });
-
-        orderDetails.push({
-            productId: product.id,
-            name: product.name,
-            price: product.price,
-            quantity: item.quantity,
-            imageUrl: product.imageUrl
-        });
-    }
-
-    const total = orderDetails.reduce((acc, item) => acc + (item.quantity * item.price), 0);
+    const total = cartItems.reduce((acc, item) => acc + (item.quantity * parseFloat(item.product.price)), 0);
 
     const order = await Order.create({
         userId,
         total,
-        details: orderDetails,
         status: 'completed',
         paymentIntentId
     }, { transaction });
 
-    await cart.destroy({ transaction });
+    for (const item of cartItems) {
+        await OrderItem.create({
+            orderId: order.id,
+            productId: item.productId,
+            quantity: item.quantity,
+            price: item.product.price
+        }, { transaction });
+    }
+
+    await userCart.destroy({ transaction });
     return order;
 }
 
@@ -132,7 +131,7 @@ exports.verifyPaymentStatus = async (req, res) => {
                 await transaction.rollback();
                 res.status(500).json({
                     success: false,
-                    message: "Erreur interne du serveur lors de la création de la commande."
+                    message: "Erreur interne du serveur lors de la création de la commande.", error: error.toString()
                 });
             }
         } else {
@@ -140,7 +139,7 @@ exports.verifyPaymentStatus = async (req, res) => {
         }
     } catch (error) {
         console.error("Erreur lors de la vérification du statut de paiement:", error);
-        res.status(500).json({ success: false, message: "Erreur interne du serveur" });
+        return res.status(500).json({ success: false, message: "Erreur interne du serveur", error: error.toString() });
     }
 };
 
@@ -153,7 +152,7 @@ exports.refundOrder = async (req, res) => {
             return res.status(404).json({ message: "Commande non trouvée" });
         }
 
-        if (order.status !== 'completed') {
+        if (order.status !== 'completed' && order.status !== 'asked_refund') {
             return res.status(400).json({ message: "Seules les commandes terminées peuvent être remboursées" });
         }
 

@@ -14,10 +14,6 @@ module.exports = (sequelize) => {
             type: DataTypes.DECIMAL(10, 2),
             allowNull: false
         },
-        details: {
-            type: DataTypes.JSON,
-            allowNull: false
-        },
         status: {
             type: DataTypes.STRING,
             allowNull: false,

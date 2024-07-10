@@ -1,4 +1,5 @@
 <template>
+  <AdminSidebar />
   <div class="stock-management max-w-4xl mx-auto py-8">
     <h1 class="text-2xl font-bold mb-6 text-center">Gestion du Stock</h1>
     <div v-for="product in products" :key="product.id" class="product-entry bg-white p-5 rounded-lg shadow mb-4">
@@ -15,18 +16,21 @@
         </button>
       </div>
     </div>
-    <adjust-stock-modal v-if="showAdjustStockModal" :product="selectedProduct" @close="closeAllModals" @stock-adjusted="handleStockAdjusted"/>
+    <adjust-stock-modal v-if="showAdjustStockModal" :product="selectedProduct" @close="closeAllModals"
+                        @stock-adjusted="handleStockAdjusted"/>
     <stock-history-modal v-if="showStockHistoryModal" :product="selectedProduct" @close="closeAllModals"/>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import AdjustStockModal from '../components/AdjustStockModal.vue';
-import StockHistoryModal from '../components/StockHistoryModal.vue';
+import AdjustStockModal from '../../components/AdjustStockModal.vue';
+import StockHistoryModal from '../../components/StockHistoryModal.vue';
+import AdminSidebar from "../../components/AdminSidebar.vue";
 
 export default {
   components: {
+    AdminSidebar,
     AdjustStockModal,
     StockHistoryModal
   },

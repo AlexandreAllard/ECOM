@@ -1,8 +1,8 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
+  <div class="max-w-7xl mx-auto py-6">
     <h1 class="text-2xl font-bold mb-6">Mes Commandes</h1>
     <div v-if="loading" class="flex justify-center items-center">
-      <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
+      <div class="loader"></div>
     </div>
     <div v-else>
       <div v-if="orders.length === 0" class="text-center text-gray-500">
@@ -10,24 +10,25 @@
       </div>
       <div v-else>
         <div v-for="order in orders" :key="order.id" class="bg-white shadow rounded-lg mb-6 p-6">
-          <h2 class="text-xl font-semibold mb-4">Commande {{ order.id }}</h2>
-          <p class="text-gray-700 mb-2"><span class="font-bold">Total:</span> {{ order.total }} €</p>
-          <p class="text-gray-700 mb-2"><span class="font-bold">Statut:</span> {{ order.status }}</p>
-          <p class="text-gray-700 mb-4"><span class="font-bold">Date:</span> {{ new Date(order.createdAt).toLocaleString() }}</p>
+          <div class="mb-4">
+            <h2 class="text-lg font-semibold">Commande ID: {{ order.id }}</h2>
+            <p><span class="font-medium">Statut:</span> {{ order.status }}</p>
+            <p><span class="font-medium">Total:</span> {{ order.total }} €</p>
+            <p><span class="font-medium">Date de commande:</span> {{ new Date(order.createdAt).toLocaleDateString() }}</p>
+          </div>
           <div>
-            <h3 class="text-lg font-semibold mb-2">Détails de la commande:</h3>
-            <ul>
-              <li v-for="item in order.details" :key="item.productId" class="mb-2">
-                <div class="flex items-center">
-                  <img :src="item.imageUrl" alt="product image" class="w-16 h-16 object-cover rounded mr-4">
-                  <div>
-                    <p class="text-gray-800 font-medium">{{ item.name }}</p>
-                    <p class="text-gray-600">Quantité: {{ item.quantity }}</p>
-                    <p class="text-gray-600">Prix: {{ item.price }} €</p>
-                  </div>
+            <h3 class="text-md font-semibold mb-2">Détails de la commande:</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div v-for="item in order.items" :key="item.id" class="border rounded-lg p-4 flex items-center space-x-3">
+                <img :src="item.product?.imageUrl || 'default-product-image.png'" alt="Product Image" class="w-20 h-20 object-cover rounded">
+                <div>
+                  <p class="text-gray-800 font-medium">{{ item.product?.name }}</p>
+                  <p class="text-gray-600">Quantité: {{ item.quantity }}</p>
+                  <p class="text-gray-600">Prix unitaire: {{ item.price }} €</p>
+                  <p class="text-gray-600">Sous-total: {{ (item.quantity * item.price).toFixed(2) }} €</p>
                 </div>
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -49,10 +50,7 @@ export default {
   async created() {
     try {
       const response = await axios.get('http://localhost:3000/orders/user-orders', {
-        withCredentials: true,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
+        withCredentials: true
       });
       this.orders = response.data;
     } catch (error) {
@@ -67,11 +65,18 @@ export default {
 <style scoped>
 .loader {
   border-top-color: #3490dc;
-  animation: spin 1s ease-in-out infinite;
+  animation: spin 1s linear infinite;
+  width: 50px;
+  height: 50px;
+  border-width: 4px;
+  border-radius: 50%;
 }
 
 @keyframes spin {
-  to {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
     transform: rotate(360deg);
   }
 }

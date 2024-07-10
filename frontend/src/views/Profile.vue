@@ -11,7 +11,7 @@
       </button>
     </div>
 
-    <user-orders></user-orders>
+    <UserOrders />
 
     <div v-if="showModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
       <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
@@ -20,10 +20,8 @@
                 @click="closeModal">&times;</span>
           <h3 class="text-lg leading-6 font-medium text-gray-900">Modifier le profil</h3>
           <form @submit.prevent="updateProfile" class="mt-2">
-            <div class="mt-4" v-for="field in ['firstname', 'lastname', 'email']" :key="field">
-              <label :for="field" class="block text-sm font-medium text-gray-700">{{
-                  field.charAt(0).toUpperCase() + field.slice(1)
-                }}:</label>
+            <div class="mt-4" v-for="field in profileFields" :key="field">
+              <label :for="field" class="block text-sm font-medium text-gray-700">{{ formatLabel(field) }}:</label>
               <input :id="field" :type="field === 'email' ? 'email' : 'text'" v-model="user[field]" required
                      class="mt-1 p-2 w-full border-gray-300 rounded-md">
             </div>
@@ -52,11 +50,12 @@ export default {
     return {
       user: {},
       showModal: false,
+      profileFields: ['firstname', 'lastname', 'email'] // Centralizing fields for better management
     };
   },
   methods: {
     fetchUser() {
-      axios.get('http://localhost:3000/users/me', {withCredentials: true})
+      axios.get('http://localhost:3000/users/me', { withCredentials: true })
           .then(response => {
             this.user = response.data;
           })
@@ -65,7 +64,7 @@ export default {
           });
     },
     updateProfile() {
-      axios.put('http://localhost:3000/users/me', this.user, {withCredentials: true})
+      axios.put('http://localhost:3000/users/me', this.user, { withCredentials: true })
           .then(() => {
             alert('Profil mis à jour avec succès.');
             this.closeModal();
@@ -79,6 +78,9 @@ export default {
     },
     closeModal() {
       this.showModal = false;
+    },
+    formatLabel(field) {
+      return field.charAt(0).toUpperCase() + field.slice(1);
     }
   },
   mounted() {

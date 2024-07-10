@@ -1,4 +1,4 @@
-const {Order} = require('../models');
+const {Order, Product, OrderItem} = require('../models');
 const PdfPrinter = require('pdfmake');
 const fs = require('fs');
 
@@ -7,24 +7,48 @@ exports.getUserOrders = async (req, res) => {
 
     try {
         const orders = await Order.findAll({
-            where: {userId},
+            where: { userId },
+            include: [{
+                model: OrderItem,
+                as: 'items',
+                include: [{
+                    model: Product,
+                    as: 'product'
+                }]
+            }],
             order: [['createdAt', 'DESC']]
         });
 
         if (!orders.length) {
-            return res.status(404).json({message: 'Aucune commande trouvée pour cet utilisateur.'});
+            return res.status(404).json({ message: 'Aucune commande trouvée pour cet utilisateur.' });
         }
 
-        res.status(200).json(orders);
+        const transformedOrders = orders.map(order => ({
+            ...order.toJSON(),
+            items: order.items.map(item => ({
+                ...item.toJSON(),
+                product: item.product.toJSON()
+            }))
+        }));
+
+        res.status(200).json(transformedOrders);
     } catch (error) {
         console.error("Erreur lors de la récupération des commandes:", error);
-        res.status(500).json({message: "Erreur interne du serveur"});
+        res.status(500).json({ message: "Erreur interne du serveur" });
     }
 };
 
 exports.getAllOrders = async (req, res) => {
     try {
         const orders = await Order.findAll({
+            include: [{
+                model: OrderItem,
+                as: 'items',
+                include: [{
+                    model: Product,
+                    as: 'product'
+                }]
+            }],
             order: [['createdAt', 'DESC']]
         });
 
@@ -42,14 +66,14 @@ exports.getAllOrders = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
     const { orderId } = req.params;
     const { status } = req.body;
-    const userId = req.user.id;
 
     try {
         const order = await Order.findOne({
-            where: {
-                id: orderId,
-                userId: userId
-            }
+            where: { id: orderId },
+            include: [{
+                model: OrderItem,
+                as: 'items'
+            }]
         });
 
         if (!order) {

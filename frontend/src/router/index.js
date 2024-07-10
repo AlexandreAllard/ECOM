@@ -82,15 +82,21 @@ const routes = [
         component: () => import('../views/ProductDetails.vue')
     },
     {
-        path: '/stock-management',
-        name: 'StockManagement',
-        component: () => import('../views/StockManagement.vue'),
-        meta: {requiresAuth: true, requiresRole: ['storekeeper', 'admin']},
-    },
-    {
-        path: '/stock-history',
-        name: 'GlobalStockHistory',
-        component: () => import('../views/GlobalStockHistory.vue'),
+        path: '/stock',
+        component: () => import('../views/stock/Stock.vue'),
+        meta: {requiresAuth: true, requiresRole: ['storekeeper','admin']},
+        children: [
+            {
+                path: 'history',
+                name: 'StockHistory',
+                component: () => import('../views/stock/StockHistory.vue')
+            },
+            {
+                path: 'management',
+                name: 'StockManagement',
+                component: () => import('../views/stock/StockManagement.vue')
+            }
+        ]
     },
     {
         path:'/payment',
