@@ -3,27 +3,49 @@ const {validationResult} = require('express-validator');
 const {StockAdjustment} = require('../models');
 const SubscriptionController = require('./subscriptionController');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const Sequelize = require('sequelize');
 
 exports.getAllProducts = async (req, res, next) => {
     try {
-        const categoryId = req.query.categoryId;
-        console.log("categoryId:", categoryId);
+        const { categoryId, productName, brand, minPrice, maxPrice, inStock } = req.query;
+
         const options = {
-            include: [{
-                model: Category,
-                as: 'category'
-            }]
+            include: [{ model: Category, as: 'category' }],
+            where: {}
         };
 
         if (categoryId) {
-            options.where = {categoryId: categoryId};
+            options.where.categoryId = categoryId;
+        }
+
+        if (productName) {
+            options.where.name = { [Sequelize.Op.iLike]: `%${productName}%` };
+        }
+
+        if (brand) {
+            options.where.brand = brand;
+        }
+
+        if (minPrice) {
+            options.where.price = { [Sequelize.Op.gte]: parseFloat(minPrice) };
+        }
+        if (maxPrice) {
+            if (options.where.price) {
+                options.where.price[Sequelize.Op.lte] = parseFloat(maxPrice);
+            } else {
+                options.where.price = { [Sequelize.Op.lte]: parseFloat(maxPrice) };
+            }
+        }
+
+        if (inStock !== undefined) {
+            options.where.stock = inStock === 'true' ? { [Sequelize.Op.gt]: 0 } : { [Sequelize.Op.eq]: 0 };
         }
 
         const products = await Product.findAll(options);
         res.json(products);
     } catch (error) {
         console.error("Failed to fetch products:", error);
-        next(error);
+        res.status(500).send("Internal server error");
     }
 };
 
