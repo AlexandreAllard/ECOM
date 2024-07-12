@@ -56,9 +56,9 @@ exports.createProduct = async (req, res, next) => {
             return res.status(422).json({ errors: errors.array() });
         }
 
-        const { name, description, price, stock, imageUrl, categoryId } = req.body;
+        const { name, description, price, brand, stock, imageUrl, categoryId } = req.body;
 
-        const product = await Product.create({ name, description, price, stock, imageUrl, categoryId });
+        const product = await Product.create({ name, description, price, brand, stock, imageUrl, categoryId });
 
         const stripeProduct = await stripe.products.create({
             name,
