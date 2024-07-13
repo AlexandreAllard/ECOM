@@ -2,6 +2,10 @@
   <div class="max-w-2xl mx-auto py-6">
     <h1 class="text-2xl font-bold text-center mb-6">Produits</h1>
     <div class="mb-4 flex justify-between">
+      <input type="text" v-model="keyword" @input="searchProducts" placeholder="Rechercher des produits"
+             class="block w-full p-2 border border-gray-300 rounded">
+    </div>
+    <div class="mb-4 flex justify-between">
       <select v-model="filters.categoryId" @change="fetchProducts"
               class="block w-full p-2 border border-gray-300 rounded mr-2">
         <option value="">Toutes les catégories</option>
@@ -58,6 +62,7 @@ export default {
     const route = useRoute();
     const products = ref([]);
     const categories = ref([]);
+    const keyword = ref('');
 
     const filters = ref({
       categoryId: route.query.categoryId || '',
@@ -75,6 +80,9 @@ export default {
           query[key] = filters.value[key];
         }
       });
+      if (keyword.value) {
+        query.keyword = keyword.value;
+      }
       router.push({ path: '/produits', query }).catch(err => {});
     };
 
@@ -93,6 +101,22 @@ export default {
       }
     };
 
+    const searchProducts = async () => {
+      if (!keyword.value) {
+        fetchProducts();
+        return;
+      }
+      try {
+        const response = await axios.get('http://localhost:3000/products/search', {
+          params: { keyword: keyword.value },
+          withCredentials: true
+        });
+        products.value = response.data;
+      } catch (error) {
+        console.error('Erreur lors de la recherche des produits:', error);
+      }
+    };
+
     const addToCart = async (productId, quantity) => {
       try {
         await axios.post('http://localhost:3000/cart/add', { productId, quantity }, { withCredentials: true });
@@ -107,6 +131,11 @@ export default {
       updateURL();
       fetchProducts();
     }, { deep: true });
+
+    watch(keyword, () => {
+      updateURL();
+      searchProducts();
+    });
 
     onMounted(() => {
       axios.get('http://localhost:3000/categories', { withCredentials: true })
@@ -123,7 +152,9 @@ export default {
       products,
       categories,
       filters,
+      keyword,
       fetchProducts,
+      searchProducts,
       addToCart
     };
   }

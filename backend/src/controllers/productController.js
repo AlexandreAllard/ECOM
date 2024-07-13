@@ -4,6 +4,7 @@ const {StockAdjustment} = require('../models');
 const SubscriptionController = require('./subscriptionController');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Sequelize = require('sequelize');
+const ProductMongo = require('../models/ProductMongo');
 
 exports.getAllProducts = async (req, res, next) => {
     try {
@@ -124,7 +125,6 @@ exports.updateProduct = async (req, res, next) => {
 
         await product.update(fieldsToUpdate);
 
-
         if (price < oldPrice) {
             SubscriptionController.notifyUsersBySubscriptionType('price_change', product.id, {
                 subject: `Baisse de prix pour ${product.name}`,
@@ -236,5 +236,30 @@ exports.getAllStockAdjustments = async (req, res) => {
     } catch (error) {
         console.error("Erreur lors de la récupération de tous les ajustements de stock :", error);
         res.status(500).json({message: "Erreur serveur lors de la récupération des ajustements de stock."});
+    }
+};
+
+exports.searchProducts = async (req, res, next) => {
+    try {
+        const { keyword } = req.query;
+        if (!keyword) {
+            return res.status(400).json({ message: 'Keyword is required' });
+        }
+
+        // Utilisation de MongoDB pour la recherche
+        const filters = {
+            $or: [
+                { name: { $regex: keyword, $options: 'i' } },
+                { description: { $regex: keyword, $options: 'i' } },
+                { brand: { $regex: keyword, $options: 'i' } }
+            ]
+        };
+
+        const products = await ProductMongo.find(filters).exec(); // Assurez-vous d'utiliser exec() pour exécuter la requête
+
+        res.json(products);
+    } catch (error) {
+        console.error("Error searching products in MongoDB:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };

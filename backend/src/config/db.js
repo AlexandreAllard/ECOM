@@ -1,4 +1,5 @@
-const {Sequelize} = require('sequelize');
+const { Sequelize } = require('sequelize');
+const mongoose = require('mongoose');
 
 const sequelize = new Sequelize(process.env.POSTGRES_DB, process.env.POSTGRES_USER, process.env.POSTGRES_PASSWORD, {
     host: process.env.DB_HOST || 'postgres',
@@ -10,6 +11,17 @@ const sequelize = new Sequelize(process.env.POSTGRES_DB, process.env.POSTGRES_US
         acquire: 30000,
         idle: 10000
     }
+});
+
+const mongoURI = process.env.MONGO_URI;
+mongoose.connect(mongoURI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('Connexion à MongoDB réussie !');
+}).catch(error => {
+    console.error('Impossible de se connecter à MongoDB :', error);
+    process.exit(1);
 });
 
 (async () => {

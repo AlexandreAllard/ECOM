@@ -93,7 +93,7 @@ export default {
     },
     saveProduct(product) {
       console.log('Saving product:', product);
-      const method = product.id ? 'patch' : 'post';
+      const method = product.id ? 'put' : 'post';
       const url = product.id ? `http://localhost:3000/products/${product.id}` : 'http://localhost:3000/products';
       axios[method](url, product, {withCredentials: true}).then(() => {
         this.fetchProductsAndCategories();

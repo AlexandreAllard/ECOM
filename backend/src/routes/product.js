@@ -7,6 +7,8 @@ const checkAdminRole = require("../middleware/adminMiddleware");
 router.get('/', authMiddleware, productController.getAllProducts);
 router.post('/', authMiddleware, productController.createProduct);
 
+router.get('/search', productController.searchProducts);
+
 router.post('/:id/stock-adjustments', authMiddleware, checkAdminRole, productController.updateProductStock);
 router.get('/:id/stock-adjustments', authMiddleware, productController.getStockAdjustments);
 
@@ -17,5 +19,6 @@ router.get('/:id', authMiddleware, productController.getProduct);
 router.put('/:id', authMiddleware, productController.updateProduct);
 router.delete('/:id', authMiddleware, productController.deleteProduct);
 router.patch('/:id', authMiddleware, productController.updateProduct);
+
 
 module.exports = router;

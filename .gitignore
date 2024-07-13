@@ -11,8 +11,8 @@ data/
 *.log
 
 # Environnement
-.env
-.env.*.local
+#.env
+#.env.*.local
 
 # macOS
 .DS_Store
