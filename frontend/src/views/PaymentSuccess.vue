@@ -14,14 +14,18 @@ export default {
   mounted() {
     const queryParams = new URLSearchParams(window.location.search);
     const paymentIntentId = queryParams.get('paymentIntentId');
-    if (paymentIntentId) {
-      this.verifyPayment(paymentIntentId);
+    const address = queryParams.get('address');
+    if (paymentIntentId && address) {
+      this.verifyPayment(paymentIntentId, address);
     }
   },
   methods: {
-    async verifyPayment(paymentIntentId) {
+    async verifyPayment(paymentIntentId, address) {
       try {
-        const response = await axios.post('http://localhost:3000/payment/verify-payment', {paymentIntentId}, {withCredentials: true});
+        const response = await axios.post('http://localhost:3000/payment/verify-payment', {
+          paymentIntentId,
+          address
+        }, {withCredentials: true});
         if (response.data.success) {
           console.log('Cart cleared and payment finalized');
         } else {

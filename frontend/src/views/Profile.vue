@@ -13,6 +13,25 @@
 
     <UserOrders />
 
+    <div class="bg-white shadow rounded-lg p-6 mt-4">
+      <h2 class="text-xl font-bold mb-4">Alertes de l'utilisateur</h2>
+      <ul v-if="alerts.length">
+        <li v-for="alert in alerts" :key="alert.id" class="mb-2">
+          <p class="text-gray-700">
+            Type d'alerte : {{ formatAlertType(alert.type) }}
+          </p>
+          <p class="text-gray-700" v-if="alert.product">
+            Produit : {{ alert.product.name }} ({{ alert.product.description }})
+          </p>
+          <p class="text-gray-500 text-sm">{{ new Date(alert.createdAt).toLocaleString() }}</p>
+          <button @click="deleteAlert(alert.id)" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+            Supprimer l'alerte
+          </button>
+        </li>
+      </ul>
+      <p v-else class="text-gray-700">Aucune alerte.</p>
+    </div>
+
     <div v-if="showModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
       <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3 text-center">
@@ -49,13 +68,14 @@ export default {
   data() {
     return {
       user: {},
+      alerts: [],
       showModal: false,
-      profileFields: ['firstname', 'lastname', 'email'] // Centralizing fields for better management
+      profileFields: ['firstname', 'lastname', 'email']
     };
   },
   methods: {
     fetchUser() {
-      axios.get('http://localhost:3000/users/me', { withCredentials: true })
+      axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/users/me`, { withCredentials: true })
           .then(response => {
             this.user = response.data;
           })
@@ -63,8 +83,27 @@ export default {
             console.error("Erreur lors de la récupération des données de l'utilisateur :", error);
           });
     },
+    fetchAlerts() {
+      axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/subscriptions/my-subscriptions`, { withCredentials: true })
+          .then(response => {
+            this.alerts = response.data;
+          })
+          .catch(error => {
+            console.error("Erreur lors de la récupération des alertes de l'utilisateur :", error);
+          });
+    },
+    deleteAlert(alertId) {
+      axios.delete(`${import.meta.env.VITE_API_ENDPOINT}:3000/subscriptions/${alertId}`, { withCredentials: true })
+          .then(() => {
+            this.alerts = this.alerts.filter(alert => alert.id !== alertId);
+            alert('Alerte supprimée avec succès.');
+          })
+          .catch(error => {
+            console.error("Erreur lors de la suppression de l'alerte :", error);
+          });
+    },
     updateProfile() {
-      axios.put('http://localhost:3000/users/me', this.user, { withCredentials: true })
+      axios.put(`${import.meta.env.VITE_API_ENDPOINT}:3000/users/me`, this.user, { withCredentials: true })
           .then(() => {
             alert('Profil mis à jour avec succès.');
             this.closeModal();
@@ -81,10 +120,18 @@ export default {
     },
     formatLabel(field) {
       return field.charAt(0).toUpperCase() + field.slice(1);
+    },
+    formatAlertType(type) {
+      const types = {
+        stock_change: 'Changement de stock',
+        price_change: 'Changement de prix'
+      };
+      return types[type] || type;
     }
   },
   mounted() {
     this.fetchUser();
+    this.fetchAlerts();
   }
 }
 </script>

@@ -112,6 +112,16 @@ db.OrderItem.belongsTo(db.Product, {
     as: 'product'
 });
 
+db.Order.hasOne(db.Delivery, {
+    foreignKey: 'orderId',
+    as: 'delivery'
+});
+
+db.Delivery.belongsTo(db.Order, {
+    foreignKey: 'orderId',
+    as: 'order'
+});
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

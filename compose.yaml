@@ -39,6 +39,8 @@ services:
     build:
       context: ./frontend
       dockerfile: docker/Dockerfile
+    environment:
+        - NODE_ENV=development
     tty: true
     stdin_open: true
     ports:

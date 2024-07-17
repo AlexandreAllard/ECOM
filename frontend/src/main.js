@@ -20,4 +20,7 @@ pinia.use(({ store }) => {
     }
 });
 
+console.log(import.meta.env.VITE_API_ENDPOINT);
+console.log(import.meta.env.VUE_APP_API_ENDPOINT);
+
 app.mount('#app');

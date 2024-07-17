@@ -13,12 +13,13 @@ const cartRoutes = require('./routes/cart');
 const subscriptionRoutes = require('./routes/subscription');
 const paymentRoutes = require('./routes/payment');
 const orderRoutes = require('./routes/order');
+const deliveryRoutes = require('./routes/delivery');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 const corsOptions = {
-    origin: ["http://localhost:8080", "http://104.248.129.67/"],
+    origin: ["http://localhost:8080", "http://104.248.129.67/", "https://facturo.fr"],
     credentials: true,
     optionsSuccessStatus: 200
 };
@@ -38,6 +39,7 @@ app.use('/cart', cartRoutes);
 app.use('/subscriptions', subscriptionRoutes);
 app.use('/payment', paymentRoutes);
 app.use('/orders', orderRoutes);
+app.use('/deliveries', deliveryRoutes);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);

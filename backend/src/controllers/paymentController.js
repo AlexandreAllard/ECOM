@@ -1,4 +1,4 @@
-const { Cart, CartItem, Product, Order, OrderItem, sequelize } = require('../models');
+const { Cart, CartItem, Product, Order, OrderItem, Delivery, sequelize } = require('../models');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { getCartTotal, clearCart } = require('./cartController');
 
@@ -18,6 +18,7 @@ async function createPaymentIntent(total, userId) {
 
 exports.createOrderAndProcessPayment = async (req, res) => {
     const { id: userId } = req.user || {};
+    const { address } = req.body;
 
     const userCart = await Cart.findOne({ where: { userId } });
     if (!userCart) {
@@ -41,36 +42,7 @@ exports.createOrderAndProcessPayment = async (req, res) => {
     }
 };
 
-exports.finalizePayment = async (req, res) => {
-    const { paymentIntentId } = req.body;
-    if (!paymentIntentId) {
-        return res.status(400).json({ message: "PaymentIntent ID is required." });
-    }
-
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    if (paymentIntent.status !== 'succeeded') {
-        return res.status(400).json({ message: "Payment not confirmed" });
-    }
-
-    const userId = paymentIntent.metadata.userId;
-    const transaction = await sequelize.transaction();
-    try {
-        const order = await createOrder(userId, paymentIntent.id, transaction);
-        console.log("Before calling clearCart");
-        await clearCart(userId, transaction);
-        await transaction.commit();
-        return res.status(200).json({ message: 'Order created and cart cleared', order });
-    } catch (error) {
-        await transaction.rollback();
-        console.error("Error during transaction:", error);
-        return res.status(500).json({
-            message: "Internal server error during database transaction.",
-            error: error.message
-        });
-    }
-};
-
-async function createOrder(userId, paymentIntentId, transaction) {
+async function createOrder(userId, paymentIntentId, address, transaction) {
     const userCart = await Cart.findOne({
         where: { userId },
         transaction
@@ -108,12 +80,19 @@ async function createOrder(userId, paymentIntentId, transaction) {
         }, { transaction });
     }
 
+    // Create delivery record
+    await Delivery.create({
+        orderId: order.id,
+        address,
+        status: 'pending'
+    }, { transaction });
+
     await userCart.destroy({ transaction });
     return order;
 }
 
 exports.verifyPaymentStatus = async (req, res) => {
-    const { paymentIntentId } = req.body;
+    const { paymentIntentId, address } = req.body;
     if (!paymentIntentId) {
         return res.status(400).json({ success: false, message: "L'ID de l'intention de paiement est requis." });
     }
@@ -124,14 +103,14 @@ exports.verifyPaymentStatus = async (req, res) => {
             const userId = paymentIntent.metadata.userId;
             const transaction = await sequelize.transaction();
             try {
-                const order = await createOrder(userId, paymentIntentId, transaction);
+                const order = await createOrder(userId, paymentIntentId, address, transaction);
                 await transaction.commit();
-                res.status(200).json({ success: true, message: 'Commande créée avec succès.', order });
+                res.status(200).json({ success: true, message: 'Commande et livraison créées avec succès.', order });
             } catch (error) {
                 await transaction.rollback();
                 res.status(500).json({
                     success: false,
-                    message: "Erreur interne du serveur lors de la création de la commande.", error: error.toString()
+                    message: "Erreur interne du serveur lors de la création de la commande et de la livraison.", error: error.toString()
                 });
             }
         } else {
@@ -142,6 +121,7 @@ exports.verifyPaymentStatus = async (req, res) => {
         return res.status(500).json({ success: false, message: "Erreur interne du serveur", error: error.toString() });
     }
 };
+
 
 exports.refundOrder = async (req, res) => {
     const { orderId } = req.params;
