@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6">
+  <div class="max-w-6xl mx-auto p-6">
     <h1 class="text-2xl font-bold mb-4 text-left">Profil</h1>
     <div class="bg-white shadow rounded-lg p-6 mb-4">
       <div class="space-y-4" v-if="user.id">

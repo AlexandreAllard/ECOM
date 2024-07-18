@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6">
+  <div class="max-w-6xl mx-auto p-6">
     <h2 class="text-2xl font-bold mb-4">Alertes</h2>
     <div class="grid grid-cols-3 gap-4">
       <div v-for="subscription in subscriptions" :key="subscription.id" class="bg-white shadow rounded-lg p-4 flex flex-col justify-between">

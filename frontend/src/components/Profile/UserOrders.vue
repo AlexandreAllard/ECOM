@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6">
+  <div class="max-w-6xl mx-auto p-6">
     <h2 class="text-2xl font-bold mb-4 text-left">Commandes</h2>
     <div class="bg-white shadow rounded-lg mb-4">
       <div v-if="isLoading">
