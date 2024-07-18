@@ -88,7 +88,7 @@ exports.notifyUsersBySubscriptionType = async (type, targetId, {subject, message
 };
 
 exports.getUserSubscriptions = async (req, res) => {
-    const userId = req.user.id;
+    const userId = req.params.id;
 
     try {
         const subscriptions = await Subscription.findAll({

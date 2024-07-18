@@ -1,17 +1,17 @@
 const {Product, Category, User} = require('../models');
 const {validationResult} = require('express-validator');
 const {StockAdjustment} = require('../models');
-const SubscriptionController = require('./subscriptionController');
+const newSubscriptionController = require('./newSubscriptionController');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const Sequelize = require('sequelize');
 const ProductMongo = require('../models/ProductMongo');
 
 exports.getAllProducts = async (req, res, next) => {
     try {
-        const { categoryId, productName, brand, minPrice, maxPrice, inStock } = req.query;
+        const {categoryId, productName, brand, minPrice, maxPrice, inStock} = req.query;
 
         const options = {
-            include: [{ model: Category, as: 'category' }],
+            include: [{model: Category, as: 'category'}],
             where: {}
         };
 
@@ -20,7 +20,7 @@ exports.getAllProducts = async (req, res, next) => {
         }
 
         if (productName) {
-            options.where.name = { [Sequelize.Op.iLike]: `%${productName}%` };
+            options.where.name = {[Sequelize.Op.iLike]: `%${productName}%`};
         }
 
         if (brand) {
@@ -28,18 +28,18 @@ exports.getAllProducts = async (req, res, next) => {
         }
 
         if (minPrice) {
-            options.where.price = { [Sequelize.Op.gte]: parseFloat(minPrice) };
+            options.where.price = {[Sequelize.Op.gte]: parseFloat(minPrice)};
         }
         if (maxPrice) {
             if (options.where.price) {
                 options.where.price[Sequelize.Op.lte] = parseFloat(maxPrice);
             } else {
-                options.where.price = { [Sequelize.Op.lte]: parseFloat(maxPrice) };
+                options.where.price = {[Sequelize.Op.lte]: parseFloat(maxPrice)};
             }
         }
 
         if (inStock !== undefined) {
-            options.where.stock = inStock === 'true' ? { [Sequelize.Op.gt]: 0 } : { [Sequelize.Op.eq]: 0 };
+            options.where.stock = inStock === 'true' ? {[Sequelize.Op.gt]: 0} : {[Sequelize.Op.eq]: 0};
         }
 
         const products = await Product.findAll(options);
@@ -54,12 +54,12 @@ exports.createProduct = async (req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(422).json({ errors: errors.array() });
+            return res.status(422).json({errors: errors.array()});
         }
 
-        const { name, description, price, brand, stock, imageUrl, categoryId } = req.body;
+        const {name, description, price, brand, stock, imageUrl, categoryId} = req.body;
 
-        const product = await Product.create({ name, description, price, brand, stock, imageUrl, categoryId });
+        const product = await Product.create({name, description, price, brand, stock, imageUrl, categoryId});
 
         const stripeProduct = await stripe.products.create({
             name,
@@ -73,7 +73,7 @@ exports.createProduct = async (req, res, next) => {
             currency: 'eur'
         });
 
-        SubscriptionController.notifyUsersBySubscriptionType('new_product', categoryId, {
+        newSubscriptionController.notifyUsers('new_product', categoryId, {
             subject: `Nouveau produit ajouté dans votre catégorie suivie`,
             message: `Découvrez notre nouveau produit: ${name}!`
         });
@@ -86,7 +86,7 @@ exports.createProduct = async (req, res, next) => {
         });
     } catch (error) {
         console.error("Error creating product:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({message: "Internal server error"});
     }
 };
 
@@ -126,7 +126,7 @@ exports.updateProduct = async (req, res, next) => {
         await product.update(fieldsToUpdate);
 
         if (price < oldPrice) {
-            SubscriptionController.notifyUsersBySubscriptionType('price_change', product.id, {
+            newSubscriptionController.notifyUsers('price_change', product.id, {
                 subject: `Baisse de prix pour ${product.name}`,
                 message: `Le prix de ${product.name} a baissé de ${oldPrice} à ${price}.`
             });
@@ -153,18 +153,18 @@ exports.deleteProduct = async (req, res, next) => {
 };
 
 exports.updateProductStock = async (req, res) => {
-    const { id: productId } = req.params;
-    const { adjustment, justification } = req.body;
+    const {id: productId} = req.params;
+    const {adjustment, justification} = req.body;
 
     try {
         const parsedAdjustment = parseInt(adjustment, 10);
         if (isNaN(parsedAdjustment)) {
-            return res.status(400).json({ message: "Invalid adjustment value provided." });
+            return res.status(400).json({message: "Invalid adjustment value provided."});
         }
 
         const product = await Product.findByPk(productId);
         if (!product) {
-            return res.status(404).json({ message: "Produit non trouvé." });
+            return res.status(404).json({message: "Produit non trouvé."});
         }
 
         const wasOutOfStock = product.stock <= 0;
@@ -178,16 +178,16 @@ exports.updateProductStock = async (req, res) => {
         });
 
         if (wasOutOfStock && product.stock > 0) {
-            SubscriptionController.notifyUsersBySubscriptionType('stock_change', productId, {
+            newSubscriptionController.notifyUsersBySubscriptionType('stock_change', productId, {
                 subject: `Réassort du produit ${product.name}`,
                 message: `Le produit ${product.name} est de nouveau en stock!`
             });
         }
 
-        res.json({ message: "Stock mis à jour avec succès.", product });
+        res.json({message: "Stock mis à jour avec succès.", product});
     } catch (error) {
         console.error("Erreur lors de la mise à jour du stock :", error);
-        res.status(500).json({ message: "Erreur serveur lors de la mise à jour du stock." });
+        res.status(500).json({message: "Erreur serveur lors de la mise à jour du stock."});
     }
 };
 
@@ -197,7 +197,7 @@ exports.getStockAdjustments = async (req, res) => {
     try {
         const stockAdjustments = await StockAdjustment.findAll({
             where: {productId},
-            include: [{ model: Product, as: 'product' }]
+            include: [{model: Product, as: 'product'}]
         });
 
         res.json(stockAdjustments);
@@ -241,25 +241,24 @@ exports.getAllStockAdjustments = async (req, res) => {
 
 exports.searchProducts = async (req, res, next) => {
     try {
-        const { keyword } = req.query;
+        const {keyword} = req.query;
         if (!keyword) {
-            return res.status(400).json({ message: 'Keyword is required' });
+            return res.status(400).json({message: 'Keyword is required'});
         }
 
-        // Utilisation de MongoDB pour la recherche
         const filters = {
             $or: [
-                { name: { $regex: keyword, $options: 'i' } },
-                { description: { $regex: keyword, $options: 'i' } },
-                { brand: { $regex: keyword, $options: 'i' } }
+                {name: {$regex: keyword, $options: 'i'}},
+                {description: {$regex: keyword, $options: 'i'}},
+                {brand: {$regex: keyword, $options: 'i'}}
             ]
         };
 
-        const products = await ProductMongo.find(filters).exec(); // Assurez-vous d'utiliser exec() pour exécuter la requête
+        const products = await ProductMongo.find(filters).exec();
 
         res.json(products);
     } catch (error) {
         console.error("Error searching products in MongoDB:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({message: "Internal server error"});
     }
 };

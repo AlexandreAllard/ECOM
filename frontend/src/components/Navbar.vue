@@ -2,7 +2,8 @@
   <nav class="bg-gray-800 text-white p-4">
     <div class="container mx-auto flex flex-wrap items-center justify-between">
       <router-link class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/">Home</router-link>
-      <router-link v-if="!isLoggedIn" class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/login">Login</router-link>
+      <router-link v-if="!isLoggedIn" class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/login">Connexion</router-link>
+      <router-link v-if="!isLoggedIn" class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/register">Inscription</router-link>
       <div v-if="role === 'admin'">
         <router-link class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/admin">Admin</router-link>
       </div>

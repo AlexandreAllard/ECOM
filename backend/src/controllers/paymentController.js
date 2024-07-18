@@ -80,7 +80,6 @@ async function createOrder(userId, paymentIntentId, address, transaction) {
         }, { transaction });
     }
 
-    // Create delivery record
     await Delivery.create({
         orderId: order.id,
         address,

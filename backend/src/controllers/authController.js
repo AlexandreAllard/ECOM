@@ -43,7 +43,7 @@ exports.login = async (req, res, next) => {
             sameSite: 'Strict',
             maxAge: 3600000
         });
-        return res.json({ user, token });
+        return res.json({ id: user.id, token });
     } catch (error) {
         next(error);
     }

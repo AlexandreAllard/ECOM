@@ -137,7 +137,9 @@ sendActivateEmail({email, token}) => {
 
 exports.getUser = async (req, res, next) => {
     try {
-        const user = await User.findByPk(req.params.id);
+        const user = await User.findByPk(req.params.id, {
+            attributes: { exclude: ['password'] }
+        });
         if (!user) {
             return res.sendStatus(404);
         }

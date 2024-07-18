@@ -11,8 +11,7 @@ const authMiddleware = async (req, res, next) => {
         req.user = await User.findByPk(decodedToken.userId);
         next();
     } catch (err) {
-        console.log('Token verification failed:', err);
-        return res.status(401).send({ message: "Invalid token" });
+        return res.sendStatus(401);
 
     }
 };

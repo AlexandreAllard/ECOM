@@ -14,7 +14,11 @@ const subscriptionRoutes = require('./routes/subscription');
 const paymentRoutes = require('./routes/payment');
 const orderRoutes = require('./routes/order');
 const deliveryRoutes = require('./routes/delivery');
-
+const newUserRoutes = require('./routes/newUser');
+const newAuthRoutes = require('./routes/newAuth');
+const newOrderRoutes = require('./routes/newOrder');
+const newSubscriptionRoutes = require('./routes/newSubscriptions');
+const newDeliveryRoutes = require('./routes/newDelivery');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -40,6 +44,12 @@ app.use('/subscriptions', subscriptionRoutes);
 app.use('/payment', paymentRoutes);
 app.use('/orders', orderRoutes);
 app.use('/deliveries', deliveryRoutes);
+
+app.use('/userss', newUserRoutes);
+app.use('/auths', newAuthRoutes);
+app.use('/orderss', newOrderRoutes);
+app.use('/subscriptionss', newSubscriptionRoutes);
+app.use('/deliveriess', newDeliveryRoutes);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
