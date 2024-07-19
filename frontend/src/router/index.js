@@ -127,7 +127,23 @@ const routes = [
         path:'/profilenew',
         name: 'ProfileNew',
         component: () => import('../views/ProfileNew.vue'),
+    },
+    {
+        path:'/adminusers',
+        name: 'AdminUsers',
+        component: () => import('../views/AdminUsers.vue'),
+    },
+    {
+        path:'/admincategories',
+        name: 'AdminCategories',
+        component: () => import('../views/AdminCategories.vue'),
+    },
+    {
+        path:'/adminproducts',
+        name: 'AdminProducts',
+        component: () => import('../views/AdminProducts.vue'),
     }
+
 ];
 
 const router = createRouter({

@@ -19,6 +19,9 @@ const newAuthRoutes = require('./routes/newAuth');
 const newOrderRoutes = require('./routes/newOrder');
 const newSubscriptionRoutes = require('./routes/newSubscriptions');
 const newDeliveryRoutes = require('./routes/newDelivery');
+const newCategoryRoutes = require('./routes/newCategory');
+const newPoductRoutes = require('./routes/newProduct');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -50,6 +53,8 @@ app.use('/auths', newAuthRoutes);
 app.use('/orderss', newOrderRoutes);
 app.use('/subscriptionss', newSubscriptionRoutes);
 app.use('/deliveriess', newDeliveryRoutes);
+app.use('/categoriess', newCategoryRoutes);
+app.use('/productss', newPoductRoutes);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);

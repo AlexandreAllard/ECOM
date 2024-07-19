@@ -1,5 +1,6 @@
 import { reactive, ref, watchEffect } from 'vue';
 import axios from 'axios';
+import { z } from 'zod';
 
 export function useForm(initialValues, schema, submitUrl, method = 'post') {
     const formData = reactive(initialValues);
@@ -14,7 +15,9 @@ export function useForm(initialValues, schema, submitUrl, method = 'post') {
             Object.keys(errors).forEach(key => errors[key] = null);
         } catch (e) {
             e.errors.forEach(error => {
-                errors[error.path[0]] = error.message;
+                if (error.path[0] !== undefined) {
+                    errors[error.path[0]] = error.message;
+                }
             });
         }
     };
@@ -24,7 +27,9 @@ export function useForm(initialValues, schema, submitUrl, method = 'post') {
     });
 
     const handleSubmit = async () => {
-        if (Object.values(errors).some(err => err !== null)) {
+        try {
+            schema.parse(formData);
+        } catch (e) {
             return;
         }
 
@@ -40,7 +45,7 @@ export function useForm(initialValues, schema, submitUrl, method = 'post') {
                 withCredentials: true
             });
             isSuccess.value = true;
-            return response.data; // Ensuring response data is returned
+            return response.data;
         } catch (error) {
             serverError.value = error.response?.data?.message || "An error occurred";
         } finally {
