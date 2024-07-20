@@ -79,7 +79,7 @@ const routes = [
     {
         path: '/product/:id',
         name: 'ProductDetails',
-        component: () => import('../views/ProductDetails.vue')
+        component: () => import('../views/ProductDetails2.vue')
     },
     {
         path: '/stock',
@@ -142,6 +142,41 @@ const routes = [
         path:'/adminproducts',
         name: 'AdminProducts',
         component: () => import('../views/AdminProducts.vue'),
+    },
+    {
+        path:'/stockmanagement',
+        name: 'StockManagement',
+        component: () => import('../views/StockManagement.vue'),
+    },
+    {
+        path:'/stockhistory',
+        name: 'StockHistory',
+        component: () => import('../views/StockHistory.vue'),
+    },
+    {
+        path:'/ordermanagement',
+        name: 'OrderManagement',
+        component: () => import('../views/OrderManagement.vue'),
+    },
+    {
+        path:'/deliverymanagement',
+        name: 'DeliveryManagement',
+        component: () => import('../views/DeliveryManagement.vue'),
+    },
+    {
+        path:'/productss',
+        name: 'Productss',
+        component: () => import('../views/Productss.vue'),
+    },
+    {
+        path:'/cartss',
+        name: 'Cart',
+        component: () => import('../views/Carts.vue'),
+    },
+    {
+        path:'/categories',
+        name: 'Categories',
+        component: () => import('../views/Categories.vue'),
     }
 
 ];

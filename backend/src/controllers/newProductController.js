@@ -1,14 +1,51 @@
 const {Product, Category} = require('../models');
 const newSubscriptionController = require('./newSubscriptionController');
+const Sequelize = require('sequelize');
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const {validationResult} = require('express-validator');
+const ProductMongo = require("../models/ProductMongo");
 
 exports.getProducts = async (req, res) => {
     try {
-        const products = await Product.findAll();
+        const { categoryId, productName, brand, minPrice, maxPrice, inStock } = req.query;
+
+        const options = {
+            where: {}
+        };
+
+        if (categoryId) {
+            options.where.categoryId = categoryId;
+        }
+
+        if (productName) {
+            options.where.name = { [Sequelize.Op.iLike]: `%${productName}%` };
+        }
+
+        if (brand) {
+            options.where.brand = brand;
+        }
+
+        if (minPrice) {
+            options.where.price = { [Sequelize.Op.gte]: parseFloat(minPrice) };
+        }
+
+        if (maxPrice) {
+            if (options.where.price) {
+                options.where.price[Sequelize.Op.lte] = parseFloat(maxPrice);
+            } else {
+                options.where.price = { [Sequelize.Op.lte]: parseFloat(maxPrice) };
+            }
+        }
+
+        if (inStock !== undefined) {
+            options.where.stock = inStock === 'true' ? { [Sequelize.Op.gt]: 0 } : { [Sequelize.Op.eq]: 0 };
+        }
+
+        const products = await Product.findAll(options);
         res.status(200).json(products);
     } catch (error) {
+        console.error("Failed to fetch products:", error);
         res.sendStatus(500);
     }
 };
@@ -100,3 +137,27 @@ exports.deleteProduct = async (req, res) => {
         res.sendStatus(500);
     }
 };
+
+exports.searchProducts = async (req, res, next) => {
+    try {
+        const {search} = req.query;
+        if (!search) {
+            return res.sendStatus(400);
+        }
+
+        const filters = {
+            $or: [
+                {name: {$regex: search, $options: 'i'}},
+                {description: {$regex: search, $options: 'i'}},
+                {brand: {$regex: search, $options: 'i'}}
+            ]
+        };
+
+        const products = await ProductMongo.find(filters).exec();
+
+        res.json(products);
+    } catch (error) {
+        res.sendStatus(500);
+    }
+};
+

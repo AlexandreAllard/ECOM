@@ -1,6 +1,7 @@
-const {Order, Product, OrderItem} = require('../models');
+const {Order, Product, OrderItem, Delivery, Cart, CartItem} = require('../models');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-exports.getAllOrders = async (req, res) => {
+exports.getOrders = async (req, res) => {
     try {
         const orders = await Order.findAll({
             order: [['createdAt', 'DESC']]
@@ -12,7 +13,7 @@ exports.getAllOrders = async (req, res) => {
     }
 };
 
-exports.getOrderById = async (req, res) => {
+exports.getOrder = async (req, res) => {
     const isAdmin = req.user.isAdmin;
 
     try {
@@ -63,11 +64,10 @@ exports.getUserOrders = async (req, res) => {
 };
 
 exports.requestRefund = async (req, res) => {
-    const { id } = req.params;
     const userId = req.user.id;
 
     try {
-        const order = await Order.findByPk(id);
+        const order = await Order.findByPk(req.params.id);
 
         if (!order) {
             return res.sendStatus(404);
@@ -90,3 +90,27 @@ exports.requestRefund = async (req, res) => {
     }
 };
 
+exports.refundOrder = async (req, res) => {
+    try {
+        const order = await Order.findByPk(req.params.id);
+
+        if (!order) {
+            return res.sendStatus(404);
+        }
+
+        if (order.status !== 'completed' && order.status !== 'asked_refund') {
+            return res.sendStatus(400);
+        }
+
+        const refund = await stripe.refunds.create({
+            payment_intent: order.paymentIntentId,
+        });
+
+        order.status = 'refunded';
+        await order.save();
+
+        res.sendStatus(200);
+    } catch (error) {
+        res.sendStatus(500);
+    }
+};

@@ -21,6 +21,9 @@ const newSubscriptionRoutes = require('./routes/newSubscriptions');
 const newDeliveryRoutes = require('./routes/newDelivery');
 const newCategoryRoutes = require('./routes/newCategory');
 const newPoductRoutes = require('./routes/newProduct');
+const newStockRoutes = require('./routes/newStock');
+const newCartRoutes = require('./routes/newCart');
+const newPaymentRoutes = require('./routes/newPayment');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -38,6 +41,17 @@ app.use(cookieParser());
 
 
 app.get('/', (req, res) => res.send('Bonjour de l\'API Mecascrap !'));
+
+app.use('/userss', newUserRoutes);
+app.use('/auths', newAuthRoutes);
+app.use('/orderss', newOrderRoutes);
+app.use('/subscriptionss', newSubscriptionRoutes);
+app.use('/deliveriess', newDeliveryRoutes);
+app.use('/categoriess', newCategoryRoutes);
+app.use('/productss', newPoductRoutes);
+app.use('/stocks', newStockRoutes);
+app.use('/cartss', newCartRoutes)
+
 app.use('/users', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/products', productRoutes);
@@ -47,14 +61,9 @@ app.use('/subscriptions', subscriptionRoutes);
 app.use('/payment', paymentRoutes);
 app.use('/orders', orderRoutes);
 app.use('/deliveries', deliveryRoutes);
+app.use('/payments', newPaymentRoutes);
 
-app.use('/userss', newUserRoutes);
-app.use('/auths', newAuthRoutes);
-app.use('/orderss', newOrderRoutes);
-app.use('/subscriptionss', newSubscriptionRoutes);
-app.use('/deliveriess', newDeliveryRoutes);
-app.use('/categoriess', newCategoryRoutes);
-app.use('/productss', newPoductRoutes);
+
 
 app.use((err, req, res, next) => {
     console.error(err.stack);

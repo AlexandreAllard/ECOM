@@ -26,11 +26,11 @@ export default {
   },
   setup() {
     const categorySchema = z.object({
-      name: z.string().nonempty({ message: "Le nom est requis" }),
+      name: z.string().nonempty({message: "Le nom est requis"}),
     });
 
-    const initialValues = { name: '' };
-    const { formData, errors, isLoading, serverError, isSuccess, handleSubmit } = useForm(
+    const initialValues = {name: ''};
+    const {formData, errors, isLoading, serverError, isSuccess, handleSubmit} = useForm(
         initialValues,
         categorySchema,
         "http://localhost:3000/categoriess/"
@@ -50,7 +50,8 @@ export default {
     return {
       categories: [],
       columns: [
-        { name: 'Nom', field: 'name' },
+        {name: 'Nom', field: 'name'},
+        {name: 'ID', field: 'id'}
       ],
       submitUrl: "http://localhost:3000/categoriess/"
     };
@@ -61,11 +62,15 @@ export default {
   methods: {
     async fetchCategories() {
       try {
-        const response = await axios.get('http://localhost:3000/categoriess', { withCredentials: true });
+        const response = await axios.get('http://localhost:3000/categoriess', {withCredentials: true});
         this.categories = response.data;
       } catch (error) {
         console.error('Failed to fetch categories', error);
       }
+    },
+    handleEdit(category) {
+      console.log('Edit category', category);
+      this.formData.name = category.name;
     },
     updateFormData(newFormData) {
       this.formData = newFormData;
@@ -81,9 +86,6 @@ export default {
     },
     updateIsSuccess(newIsSuccess) {
       this.isSuccess = newIsSuccess;
-      if (newIsSuccess) {
-        this.fetchCategories();
-      }
     }
   }
 };

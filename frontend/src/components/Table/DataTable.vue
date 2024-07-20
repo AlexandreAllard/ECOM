@@ -54,7 +54,7 @@
     <div v-if="modalOpen" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 space-y-4">
         <div class="flex justify-between items-center">
-          <h2 class="text-xl font-semibold">{{ currentEditData.id ? 'Éditer Utilisateur' : 'Ajouter Utilisateur' }}</h2>
+          <h2 class="text-xl font-semibold">{{ currentEditData.id ? 'Éditer' : 'Ajouter' }}</h2>
           <button @click="closeModal" class="text-gray-400 hover:text-gray-600">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                  stroke="currentColor">
