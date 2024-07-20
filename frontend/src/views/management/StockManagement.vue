@@ -38,8 +38,8 @@
 
 <script>
 import axios from 'axios';
-import AdjustStockModal from '../components/AdjustStockModal2.vue';
-import StockHistoryModal from '../components/StockHistoryModal.vue';
+import AdjustStockModal from '../../components/AdjustStockModal2.vue';
+import StockHistoryModal from '../../components/StockHistoryModal.vue';
 
 export default {
   components: {
@@ -57,7 +57,7 @@ export default {
   methods: {
     fetchProducts() {
       this.isLoading = true;
-      axios.get('http://localhost:3000/productss', {withCredentials: true})
+      axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/productss`, {withCredentials: true})
           .then(response => {
             this.products = response.data;
           })
@@ -81,7 +81,7 @@ export default {
       this.selectedProduct = null;
     },
     saveStockAdjustment(product, change, justification) {
-      axios.post(`http://localhost:3000/stocks/${product.id}`, {change, justification}, {withCredentials: true})
+      axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/stocks/${product.id}`, {change, justification}, {withCredentials: true})
           .then(() => {
             product.stock += change;
             this.closeAdjustStockModal();

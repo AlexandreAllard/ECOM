@@ -45,7 +45,7 @@ const resetPassword = () => {
     message.value = "Les mots de passe ne correspondent pas.";
     return;
   }
-  axios.post(`http://localhost:3000/users/reset-password/${token.value}`, { newPassword: password.value })
+  axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/users/reset-password/${token.value}`, { newPassword: password.value })
       .then(() => {
         message.value = "Votre mot de passe a été réinitialisé avec succès.";
       })

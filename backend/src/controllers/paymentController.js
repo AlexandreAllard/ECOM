@@ -86,7 +86,11 @@ async function createOrder(userId, paymentIntentId, address, transaction) {
         status: 'pending'
     }, { transaction });
 
-    await userCart.destroy({ transaction });
+    await CartItem.destroy({
+        where: { cartId: userCart.id },
+        transaction
+    });
+
     return order;
 }
 

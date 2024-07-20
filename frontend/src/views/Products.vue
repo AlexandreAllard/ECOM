@@ -1,162 +1,210 @@
 <template>
-  <div class="max-w-2xl mx-auto py-6">
-    <h1 class="text-2xl font-bold text-center mb-6">Produits</h1>
-    <div class="mb-4 flex justify-between">
-      <input type="text" v-model="keyword" @input="searchProducts" placeholder="Rechercher des produits"
-             class="block w-full p-2 border border-gray-300 rounded">
-    </div>
-    <div class="mb-4 flex justify-between">
-      <select v-model="filters.categoryId" @change="fetchProducts"
-              class="block w-full p-2 border border-gray-300 rounded mr-2">
+  <div class="max-w-7xl mx-auto p-6">
+    <h2 class="text-2xl font-bold mb-4">Produits</h2>
+
+    <div class="mb-4">
+      <input
+          v-model="searchQuery"
+          @input="updateFilters"
+          type="text"
+          placeholder="Rechercher des produits..."
+          class="w-full p-2 border border-gray-300 rounded mb-2"
+      />
+
+      <select v-model="selectedCategory" @change="updateFilters" class="w-full p-2 border border-gray-300 rounded mb-2">
         <option value="">Toutes les catégories</option>
-        <option v-for="category in categories" :key="category.id" :value="category.id">
-          {{ category.name }}
-        </option>
+        <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
       </select>
-      <input type="text" v-model="filters.productName" @input="fetchProducts" placeholder="Nom du produit"
-             class="block w-full p-2 border border-gray-300 rounded mr-2">
-      <input type="text" v-model="filters.brand" @input="fetchProducts" placeholder="Marque"
-             class="block w-full p-2 border border-gray-300 rounded mr-2">
-      <input type="number" v-model.number="filters.minPrice" @input="fetchProducts" placeholder="Prix min"
-             class="block w-full p-2 border border-gray-300 rounded mr-2">
-      <input type="number" v-model.number="filters.maxPrice" @input="fetchProducts" placeholder="Prix max"
-             class="block w-full p-2 border border-gray-300 rounded">
-      <select v-model="filters.inStock" @change="fetchProducts" class="block w-full p-2 border border-gray-300 rounded">
-        <option value="">Tous les produits</option>
+
+      <input
+          v-model.number="minPrice"
+          @input="updateFilters"
+          type="number"
+          placeholder="Prix minimum"
+          class="w-full p-2 border border-gray-300 rounded mb-2"
+      />
+
+      <input
+          v-model.number="maxPrice"
+          @input="updateFilters"
+          type="number"
+          placeholder="Prix maximum"
+          class="w-full p-2 border border-gray-300 rounded mb-2"
+      />
+
+      <input
+          v-model="brand"
+          @input="updateFilters"
+          type="text"
+          placeholder="Marque"
+          class="w-full p-2 border border-gray-300 rounded mb-2"
+      />
+
+      <select v-model="inStock" @change="updateFilters" class="w-full p-2 border border-gray-300 rounded mb-2">
+        <option value="">Tous</option>
         <option value="true">En stock</option>
         <option value="false">Hors stock</option>
       </select>
     </div>
-    <ul class="space-y-4">
-      <li v-for="product in products" :key="product.id" class="p-4 border border-gray-200 rounded shadow">
-        <div class="flex justify-between items-center">
-          <div>
-            <router-link :to="'/product/' + product.id" class="text-blue-500 hover:text-blue-700">{{
-                product.name
-              }}
-            </router-link>
-            - {{ product.brand }} - ${{ product.price }}
-          </div>
-          <div class="flex items-center">
-            <input type="number" v-model.number="product.quantity" min="1"
-                   class="w-16 p-1 border border-gray-300 rounded mr-2"/>
-            <button @click="addToCart(product.id, product.quantity || 1)"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Ajouter au panier
-            </button>
-          </div>
-        </div>
-      </li>
-    </ul>
+
+    <div v-if="isLoading" class="mt-4">
+      Chargement des produits...
+    </div>
+
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div v-for="product in filteredProducts" :key="product.id" class="bg-white p-4 rounded shadow cursor-pointer" @click="viewProductDetails(product.id)">
+        <img :src="product.imageUrl" alt="" class="w-full h-48 object-cover mb-4">
+        <h3 class="text-lg font-bold mb-2">{{ product.name }}</h3>
+        <p class="text-gray-600 mb-2">{{ product.description }}</p>
+        <p class="text-xl font-semibold mb-4">{{ product.price }} €</p>
+        <button @click.stop="addToCart(product)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          Ajouter au panier
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import { ref, watch, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 
 export default {
-  setup() {
-    const router = useRouter();
-    const route = useRoute();
-    const products = ref([]);
-    const categories = ref([]);
-    const keyword = ref('');
-
-    const filters = ref({
-      categoryId: route.query.categoryId || '',
-      productName: route.query.productName || '',
-      brand: route.query.brand || '',
-      minPrice: route.query.minPrice || '',
-      maxPrice: route.query.maxPrice || '',
-      inStock: route.query.inStock || ''
-    });
-
-    const updateURL = () => {
-      const query = {};
-      Object.keys(filters.value).forEach(key => {
-        if (filters.value[key]) {
-          query[key] = filters.value[key];
-        }
-      });
-      if (keyword.value) {
-        query.keyword = keyword.value;
-      }
-      router.push({ path: '/produits', query }).catch(err => {});
-    };
-
-    const fetchProducts = async () => {
-      const params = {};
-      Object.keys(filters.value).forEach(key => {
-        if (filters.value[key]) {
-          params[key] = filters.value[key];
-        }
-      });
-      try {
-        const response = await axios.get('http://localhost:3000/products', { params, withCredentials: true });
-        products.value = response.data;
-      } catch (error) {
-        console.error('Erreur lors du chargement des produits:', error);
-      }
-    };
-
-    const searchProducts = async () => {
-      if (!keyword.value) {
-        fetchProducts();
-        return;
-      }
-      try {
-        const response = await axios.get('http://localhost:3000/products/search', {
-          params: { keyword: keyword.value },
-          withCredentials: true
-        });
-        products.value = response.data;
-      } catch (error) {
-        console.error('Erreur lors de la recherche des produits:', error);
-      }
-    };
-
-    const addToCart = async (productId, quantity) => {
-      try {
-        await axios.post('http://localhost:3000/cart/add', { productId, quantity }, { withCredentials: true });
-        alert("Produit ajouté au panier avec succès !");
-      } catch (error) {
-        console.error("Erreur lors de l'ajout au panier:", error);
-        alert("Erreur lors de l'ajout au panier: " + error.message);
-      }
-    };
-
-    watch(filters, () => {
-      updateURL();
-      fetchProducts();
-    }, { deep: true });
-
-    watch(keyword, () => {
-      updateURL();
-      searchProducts();
-    });
-
-    onMounted(() => {
-      axios.get('http://localhost:3000/categories', { withCredentials: true })
-          .then(response => {
-            categories.value = response.data;
-          })
-          .catch(error => {
-            console.error("Erreur lors du chargement des catégories:", error);
-          });
-      fetchProducts();
-    });
-
+  data() {
     return {
-      products,
-      categories,
-      filters,
-      keyword,
-      fetchProducts,
-      searchProducts,
-      addToCart
+      products: [],
+      searchResults: [],
+      categories: [],
+      searchQuery: '',
+      selectedCategory: '',
+      minPrice: '',
+      maxPrice: '',
+      brand: '',
+      inStock: '',
+      isLoading: false
     };
+  },
+  computed: {
+    filteredProducts() {
+      let filtered = this.products;
+
+      if (this.searchQuery) {
+        filtered = this.searchResults;
+      }
+
+      if (this.selectedCategory) {
+        filtered = filtered.filter(product => product.categoryId === this.selectedCategory);
+      }
+
+      if (this.minPrice !== '') {
+        filtered = filtered.filter(product => product.price >= this.minPrice);
+      }
+
+      if (this.maxPrice !== '') {
+        filtered = filtered.filter(product => product.price <= this.maxPrice);
+      }
+
+      if (this.brand) {
+        filtered = filtered.filter(product => product.brand.toLowerCase().includes(this.brand.toLowerCase()));
+      }
+
+      if (this.inStock !== '') {
+        if (this.inStock === 'true') {
+          filtered = filtered.filter(product => product.stock > 0);
+        } else {
+          filtered = filtered.filter(product => product.stock === 0);
+        }
+      }
+
+      return filtered;
+    }
+  },
+  methods: {
+    async fetchProducts() {
+      this.isLoading = true;
+      try {
+        const [productsResponse, searchResponse] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/productss`),
+          this.searchQuery ? axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/productss/search`, { params: { search: this.searchQuery } }) : Promise.resolve({ data: [] })
+        ]);
+
+        this.products = productsResponse.data;
+        this.searchResults = searchResponse.data;
+      } catch (error) {
+        console.error('Erreur lors de la récupération des produits:', error);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    async fetchCategories() {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/categoriess`);
+        this.categories = response.data;
+      } catch (error) {
+        console.error('Erreur lors de la récupération des catégories:', error);
+      }
+    },
+    updateFilters() {
+      const params = new URLSearchParams();
+
+      if (this.searchQuery) {
+        params.append('search', this.searchQuery);
+      }
+
+      if (this.selectedCategory) {
+        params.append('categoryId', this.selectedCategory);
+      }
+
+      if (this.minPrice !== '') {
+        params.append('minPrice', this.minPrice);
+      }
+
+      if (this.maxPrice !== '') {
+        params.append('maxPrice', this.maxPrice);
+      }
+
+      if (this.brand) {
+        params.append('brand', this.brand);
+      }
+
+      if (this.inStock !== '') {
+        params.append('inStock', this.inStock);
+      }
+
+      const queryString = params.toString();
+      history.pushState(null, '', '?' + queryString);
+      this.fetchProducts();
+    },
+    viewProductDetails(productId) {
+      this.$router.push({ name: 'ProductDetails', params: { id: productId } });
+    },
+    async addToCart(product) {
+      try {
+        await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/cartss/${product.id}`, { quantity: 1 }, { withCredentials: true });
+        alert('Produit ajouté au panier avec succès');
+      } catch (error) {
+        console.error('Erreur lors de l\'ajout au panier:', error);
+        alert('Erreur lors de l\'ajout au panier');
+      }
+    }
+  },
+  async created() {
+    const query = new URLSearchParams(window.location.search);
+    this.searchQuery = query.get('search') || '';
+    this.selectedCategory = query.get('categoryId') || '';
+    this.minPrice = query.get('minPrice') || '';
+    this.maxPrice = query.get('maxPrice') || '';
+    this.brand = query.get('brand') || '';
+    this.inStock = query.get('inStock') || '';
+    await this.fetchCategories();
+    await this.fetchProducts();
   }
 };
 </script>
+
+<style scoped>
+.cursor-pointer {
+  cursor: pointer;
+}
+</style>
+
+

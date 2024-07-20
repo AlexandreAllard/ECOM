@@ -22,7 +22,7 @@ export default {
   async created() {
     try {
       const token = this.$route.params.token;
-      const response = await axios.get(`http://localhost:3000/users/verify/${token}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/users/verify/${token}`);
       this.message = 'Votre compte a été activé avec succès!';
     } catch (error) {
       this.message = 'Le lien est invalide ou a expiré.';

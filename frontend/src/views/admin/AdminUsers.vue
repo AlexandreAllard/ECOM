@@ -1,124 +1,99 @@
 <template>
-  <div class="max-w-7xl mx-auto py-6">
-    <p class="text-xl font-semibold mb-4">Administration des Utilisateurs</p>
-    <button @click="openAddModal" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">
-      Ajouter un utilisateur
-    </button>
-    <data-table
+  <div>
+    <DataTable
         :data="users"
         :columns="columns"
-        :actions="actions"
-        @delete-item="deleteUser"
-        @update-item="openModal"
+        title="Utilisateurs"
+        :editable-fields="['lastname', 'firstname', 'email', 'role']"
+        :create-fields="['lastname', 'firstname', 'email', 'password']"
+        :submit-url="submitUrl"
+        :method="'patch'"
+        @update="fetchUsers"
     />
-    <div v-if="showModal" class="modal-backdrop">
-      <user-form
-          :user="selectedUser"
-          :is-new="false"
-          @save="saveUser"
-          @close="closeModal"
-      />
-    </div>
-    <div v-if="showAddModal" class="modal-backdrop">
-      <user-form
-          :user="newUser"
-          :is-new="true"
-          @save="saveUser"
-          @close="closeAddModal"
-      />
-    </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
-import DataTable from "../../components/DataTable.vue";
-import UserForm from "../../components/UserForm.vue";
+import { ref } from 'vue';
+import { z } from 'zod';
+import DataTable from '../../components/Table/DataTable.vue';
+import { useForm } from '../../composables/useForm';
 
 export default {
   components: {
-    DataTable,
-    UserForm
+    DataTable
+  },
+  setup() {
+    const userSchema = z.object({
+      lastname: z.string().nonempty({message: "Le nom est requis"}),
+      firstname: z.string().nonempty({message: "Le prénom est requis"}),
+      email: z.string().email({message: "Email invalide"})
+    });
+
+    const initialValues = {name: '', email: ''};
+    const {formData, errors, isLoading, serverError, isSuccess, handleSubmit} = useForm(
+        initialValues,
+        userSchema,
+        `${import.meta.env.VITE_API_ENDPOINT}:3000/userss/`
+    );
+
+    return {
+      userSchema,
+      formData,
+      errors,
+      isLoading,
+      serverError,
+      isSuccess,
+      handleSubmit
+    };
   },
   data() {
     return {
       users: [],
-      showModal: false,
-      showAddModal: false,
-      selectedUser: null,
-      newUser: { email: '', firstname: '', lastname: '', password: '', role: 'user' }
+      columns: [
+        {name: 'Nom', field: 'lastname'},
+        {name: 'Prénom', field: 'firstname'},
+        {name: 'Email', field: 'email'},
+        {name: 'Rôle', field: 'role'}
+      ],
+      submitUrl: `${import.meta.env.VITE_API_ENDPOINT}:3000/userss/`
     };
-  },
-  computed: {
-    columns() {
-      return [
-        { key: 'email', label: 'Email', sortable: true, searchable: true },
-        { key: 'lastname', label: 'Nom', sortable: true, searchable: true },
-        { key: 'firstname', label: 'Prénom', sortable: true, searchable: true }
-      ];
-    },
-    actions() {
-      return ['edit', 'delete'];
-    }
-  },
-  methods: {
-    fetchUsers() {
-      axios.get('http://localhost:3000/users', { withCredentials: true })
-          .then(response => {
-            this.users = response.data;
-          })
-          .catch(error => console.error("Error fetching the users:", error));
-    },
-    openModal(user) {
-      this.selectedUser = { ...user };
-      this.showModal = true;
-    },
-    closeModal() {
-      this.showModal = false;
-      this.selectedUser = null;
-    },
-    openAddModal() {
-      this.newUser = { email: '', firstname: '', lastname: '', password: '', role: 'user' };
-      this.showAddModal = true;
-    },
-    closeAddModal() {
-      this.showAddModal = false;
-    },
-    saveUser(user) {
-      const method = user.id ? 'patch' : 'post';
-      const url = user.id ? `http://localhost:3000/users/${user.id}` : 'http://localhost:3000/users';
-      axios[method](url, user, { withCredentials: true })
-          .then(() => {
-            this.closeModal();
-            this.closeAddModal();
-            this.fetchUsers();
-            alert('Changes saved successfully.');
-          })
-          .catch(error => console.error("Failed to save user:", error));
-    },
-    deleteUser(userId) {
-      axios.delete(`http://localhost:3000/users/${userId}`, { withCredentials: true })
-          .then(() => this.fetchUsers())
-          .catch(error => console.error("Failed to delete user:", error));
-    }
   },
   mounted() {
     this.fetchUsers();
+  },
+  methods: {
+    async fetchUsers() {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/userss`, {withCredentials: true});
+        this.users = response.data;
+      } catch (error) {
+        console.error('Failed to fetch users', error);
+      }
+    },
+    handleEdit(user) {
+      console.log('Edit user', user);
+      this.formData.firstname = user.firstname;
+      this.formData.lastname = user.lastname;
+      this.formData.email = user.email;
+      this.formData.role = user.role;
+    },
+    updateFormData(newFormData) {
+      this.formData = newFormData;
+    },
+    updateIsLoading(newIsLoading) {
+      this.isLoading = newIsLoading;
+    },
+    updateErrors(newErrors) {
+      this.errors = newErrors;
+    },
+    updateServerError(newServerError) {
+      this.serverError = newServerError;
+    },
+    updateIsSuccess(newIsSuccess) {
+      this.isSuccess = newIsSuccess;
+    }
   }
-}
+};
 </script>
-
-<style>
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-</style>

@@ -30,7 +30,7 @@ export default {
   methods: {
     async resendVerificationEmail() {
       try {
-        const response = await axios.post('http://localhost:3000/users/resend-verification', { email: this.email });
+        const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/users/resend-verification`, { email: this.email });
         alert(response.data.message);
       } catch (error) {
         console.error('Error resending verification email:', error.response.data.message);

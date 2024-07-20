@@ -57,7 +57,7 @@ export default {
     const deleteUser = () => {
       if (canDelete.value) {
         const id = auth.user.id;
-        axios.delete(`http://localhost:3000/userss/${id}`, { withCredentials: true })
+        axios.delete(`${import.meta.env.VITE_API_ENDPOINT}:3000/userss/${id}`, { withCredentials: true })
             .then(() => {
               alert('Votre compte a été supprimé avec succès.');
               auth.logout();

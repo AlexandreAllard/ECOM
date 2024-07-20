@@ -91,7 +91,7 @@ export default {
     const fetchDeliveries = async () => {
       isLoading.value = true;
       try {
-        const response = await axios.get('http://localhost:3000/deliveriess', { withCredentials: true });
+        const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/deliveriess`, { withCredentials: true });
         deliveries.value = response.data;
       } catch (error) {
         console.error("Erreur lors de la récupération des livraisons:", error);
@@ -115,7 +115,7 @@ export default {
     const updateStatus = async () => {
       if (!selectedDelivery.value) return;
       try {
-        await axios.patch(`http://localhost:3000/deliveriess/${selectedDelivery.value.id}`,
+        await axios.patch(`${import.meta.env.VITE_API_ENDPOINT}:3000/deliveriess/${selectedDelivery.value.id}`,
             { status: selectedStatus.value },
             { withCredentials: true });
         alert('Statut de la livraison mis à jour avec succès.');

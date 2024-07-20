@@ -77,7 +77,7 @@ export default {
     async fetchOrders() {
       try {
         const userId = localStorage.getItem('id');
-        const response = await axios.get(`http://localhost:3000/orderss/user/${userId}`, { withCredentials: true });
+        const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/orderss/user/${userId}`, { withCredentials: true });
         this.orders = response.data;
       } catch (error) {
         console.error('Erreur lors de la récupération des commandes:', error);
@@ -91,7 +91,7 @@ export default {
     },
     async requestRefund(orderId) {
       try {
-        await axios.patch(`http://localhost:3000/orderss/refund/ask/${orderId}`, {}, { withCredentials: true });
+        await axios.patch(`${import.meta.env.VITE_API_ENDPOINT}:3000/orderss/refund/ask/${orderId}`, {}, { withCredentials: true });
         alert('Demande de remboursement envoyée.');
         this.fetchOrders();
       } catch (error) {

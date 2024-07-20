@@ -78,7 +78,7 @@ export default {
     const fetchOrders = async () => {
       isLoading.value = true;
       try {
-        const ordersResponse = await axios.get('http://localhost:3000/orderss', { withCredentials: true });
+        const ordersResponse = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/orderss`, { withCredentials: true });
         orders.value = ordersResponse.data;
 
         // Fetch user emails
@@ -95,7 +95,7 @@ export default {
 
       for (const userId of userIds) {
         try {
-          const userResponse = await axios.get(`http://localhost:3000/users/${userId}`, { withCredentials: true });
+          const userResponse = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/users/${userId}`, { withCredentials: true });
           userEmails[userId] = userResponse.data.email;
         } catch (error) {
           console.error(`Erreur lors de la récupération de l'email pour l'utilisateur ${userId}:`, error);
@@ -106,7 +106,7 @@ export default {
 
     const refundOrder = async (orderId) => {
       try {
-        await axios.post(`http://localhost:3000/orderss/refund/${orderId}`, {}, { withCredentials: true });
+        await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/orderss/refund/${orderId}`, {}, { withCredentials: true });
         alert('Commande remboursée avec succès.');
         fetchOrders(); // Rafraîchir la liste des commandes
       } catch (error) {

@@ -37,7 +37,7 @@ export default {
   methods: {
     async fetchAdjustments() {
       try {
-        const response = await axios.get(`http://localhost:3000/products/${this.product.id}/stock-adjustments`, {withCredentials: true});
+        const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/products/${this.product.id}/stock-adjustments`, {withCredentials: true});
         this.adjustments = response.data;
       } catch (error) {
         console.error("Erreur lors de la récupération des ajustements de stock:", error);

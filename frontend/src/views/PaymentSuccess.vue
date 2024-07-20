@@ -22,7 +22,7 @@ export default {
   methods: {
     async verifyPayment(paymentIntentId, address) {
       try {
-        const response = await axios.post('http://localhost:3000/payment/verify-payment', {
+        const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/payment/verify-payment`, {
           paymentIntentId,
           address
         }, {withCredentials: true});

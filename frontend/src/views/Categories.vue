@@ -32,18 +32,15 @@ export default {
     async fetchCategories() {
       this.isLoading = true;
       try {
-        // Fetch categories
-        const response = await axios.get('http://localhost:3000/categoriess');
+        const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/categoriess`);
         const categories = response.data;
 
-        // Fetch products for each category
         const categoryPromises = categories.map(async (category) => {
-          const productsResponse = await axios.get(`http://localhost:3000/productss?categoryId=${category.id}`);
+          const productsResponse = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/productss?categoryId=${category.id}`);
           category.products = productsResponse.data;
           return category;
         });
 
-        // Wait for all promises to resolve
         this.categories = await Promise.all(categoryPromises);
       } catch (error) {
         console.error('Erreur lors de la récupération des catégories:', error);
@@ -57,7 +54,7 @@ export default {
     },
     async subscribeToCategory(categoryId) {
       try {
-        await axios.post('http://localhost:3000/subscriptions', {
+        await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/subscriptions`, {
           targetId: categoryId,
           type: 'new_product'
         }, { withCredentials: true });

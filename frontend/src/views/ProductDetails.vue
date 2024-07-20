@@ -1,24 +1,26 @@
 <template>
-  <div v-if="product" class="max-w-2xl mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-4">{{ product.name }}</h1>
-    <p class="text-gray-700 font-bold mb-2">{{ product.brand }}</p>
-    <p class="text-gray-700 text-lg mb-2">{{ product.description }}</p>
-
-    <p class="text-xl font-semibold mb-4">Price: ${{ product.price }}</p>
-    <div class="flex space-x-4 mb-6">
-      <button @click="addToCart(product.id, 1)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200">
-        Add to Cart
-      </button>
-      <button @click="subscribeToPriceChange(product.id)" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-200">
-        Subscribe to Price Alerts
-      </button>
-      <button @click="subscribeToRestock(product.id)" class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition duration-200">
-        Subscribe to Restock Alerts
-      </button>
+  <div class="max-w-7xl mx-auto p-6">
+    <div v-if="isLoading" class="mt-4">
+      Chargement du produit...
     </div>
-  </div>
-  <div v-else class="p-6 text-center">
-    <p>Loading product details...</p>
+
+    <div v-else class="bg-white p-6 rounded shadow">
+      <img :src="product.imageUrl" alt="" class="w-full h-64 object-cover mb-4">
+      <h2 class="text-2xl font-bold mb-4">{{ product.name }}</h2>
+      <p class="text-gray-600 mb-4">{{ product.description }}</p>
+      <p class="text-xl font-semibold mb-4">{{ product.price }} €</p>
+      <button @click="addToCart(product)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Ajouter au panier
+      </button>
+      <div class="mt-4 flex space-x-4">
+        <button @click="subscribeToProduct('stock_change')" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+          S'abonner aux changements de stock
+        </button>
+        <button @click="subscribeToProduct('price_change')" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
+          S'abonner aux changements de prix
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -28,63 +30,50 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      product: null
+      product: null,
+      isLoading: false
     };
   },
   methods: {
-    fetchProduct() {
-      const id = this.$route.params.id;
-      axios.get(`http://localhost:3000/products/${id}`, {withCredentials: true})
-          .then(response => {
-            this.product = response.data;
-          })
-          .catch(error => {
-            console.error("Error fetching product details:", error);
-            this.product = {};
-          });
+    async fetchProduct() {
+      this.isLoading = true;
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/productss/${this.$route.params.id}`);
+        this.product = response.data;
+      } catch (error) {
+        console.error('Erreur lors de la récupération du produit:', error);
+      } finally {
+        this.isLoading = false;
+      }
     },
-    addToCart(productId, quantity = 1) {
-      axios.post('http://localhost:3000/cart/add', {
-        productId: productId,
-        quantity: quantity
-      }, {withCredentials: true})
-          .then(() => {
-            alert("Product added to cart!");
-          })
-          .catch(error => {
-            console.error("Error adding product to cart:", error);
-            alert("Failed to add product to cart");
-          });
+    async addToCart(product) {
+      try {
+        await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/cartss/${product.id}`, { quantity: 1 }, { withCredentials: true });
+        alert('Produit ajouté au panier avec succès');
+      } catch (error) {
+        console.error('Erreur lors de l\'ajout au panier:', error);
+        alert('Erreur lors de l\'ajout au panier');
+      }
     },
-    subscribeToPriceChange(productId) {
-      axios.post('http://localhost:3000/subscriptions', {
-        targetId: productId,
-        type: 'price_change'
-      }, {withCredentials: true})
-          .then(() => {
-            alert("Subscribed to price change alerts!");
-          })
-          .catch(error => {
-            console.error("Error subscribing to price change alerts:", error);
-            alert("Failed to subscribe to price change alerts");
-          });
-    },
-    subscribeToRestock(productId) {
-      axios.post('http://localhost:3000/subscriptions', {
-        targetId: productId,
-        type: 'stock_change'
-      }, {withCredentials: true})
-          .then(() => {
-            alert("Subscribed to restock alerts!");
-          })
-          .catch(error => {
-            console.error("Error subscribing to restock alerts:", error);
-            alert("Failed to subscribe to restock alerts");
-          });
+    async subscribeToProduct(type) {
+      try {
+        await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/subscriptions`, {
+          targetId: this.product.id,
+          type
+        }, { withCredentials: true });
+        alert(`Vous êtes abonné aux ${type === 'stock_change' ? 'changements de stock' : 'changements de prix'} pour ce produit.`);
+      } catch (error) {
+        console.error(`Erreur lors de l'abonnement aux ${type === 'stock_change' ? 'changements de stock' : 'changements de prix'}:`, error);
+        alert(`Erreur lors de l'abonnement aux ${type === 'stock_change' ? 'changements de stock' : 'changements de prix'}.`);
+      }
     }
   },
-  mounted() {
-    this.fetchProduct();
+  async created() {
+    await this.fetchProduct();
   }
 };
 </script>
+
+<style scoped>
+/* Ajoutez ici vos styles personnalisés */
+</style>

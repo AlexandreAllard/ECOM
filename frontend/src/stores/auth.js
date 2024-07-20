@@ -13,7 +13,7 @@ export const useAuthStore = defineStore('auth', {
             this.validateToken();
         },
         validateToken() {
-            return axios.get('http://localhost:3000/auths/validate-token', { withCredentials: true })
+            return axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/auths/validate-token`, { withCredentials: true })
                 .then(response => {
                     this.isLoggedIn = true;
                     return this.getProfile();
@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', {
             this.role = null;
         },
         login(credentials) {
-            return axios.post('http://localhost:3000/auths/login', credentials, { withCredentials: true })
+            return axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/auths/login`, credentials, { withCredentials: true })
                 .then(response => {
                     this.isLoggedIn = true;
                     localStorage.setItem('id', response.data.id);
@@ -47,7 +47,7 @@ export const useAuthStore = defineStore('auth', {
             if (!userId) {
                 return Promise.reject('No user ID found');
             }
-            return axios.get(`http://localhost:3000/userss/${userId}`, { withCredentials: true })
+            return axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/userss/${userId}`, { withCredentials: true })
                 .then(response => {
                     this.user = response.data;
                     this.role = response.data.role;
@@ -62,7 +62,7 @@ export const useAuthStore = defineStore('auth', {
                 });
         },
         logout() {
-            return axios.post('http://localhost:3000/auths/logout', {}, { withCredentials: true })
+            return axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/auths/logout`, {}, { withCredentials: true })
                 .then(() => {
                     this.resetAuth();
                 })

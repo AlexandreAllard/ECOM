@@ -14,7 +14,7 @@ export default {
   data() {
     return {
       chart: null,
-      apiUrl: 'http://localhost:3000/orders/all-orders'
+      apiUrl: `${import.meta.env.VITE_API_ENDPOINT}:3000/orders/all-orders`
     };
   },
   mounted() {

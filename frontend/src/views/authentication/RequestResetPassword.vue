@@ -34,7 +34,7 @@ const isSuccess = ref(false);
 
 const requestReset = async () => {
   try {
-    const response = await axios.post('http://localhost:3000/users/reset-password-request', {email: email.value});
+    const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/users/reset-password-request`, {email: email.value});
     message.value = response.data.message;
     isSuccess.value = true;
   } catch (error) {

@@ -51,7 +51,7 @@ export default {
   },
   methods: {
     fetchOrders() {
-      axios.get('http://localhost:3000/orders/user-orders', {withCredentials: true})
+      axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/orders/user-orders`, {withCredentials: true})
           .then(response => {
             this.orders = response.data;
           })
@@ -60,7 +60,7 @@ export default {
           });
     },
     askForRefund(orderId) {
-      axios.patch(`http://localhost:3000/orders/${orderId}/status`, {status: 'asked_refund'}, {withCredentials: true})
+      axios.patch(`${import.meta.env.VITE_API_ENDPOINT}:3000/orders/${orderId}/status`, {status: 'asked_refund'}, {withCredentials: true})
           .then(() => {
             alert('Demande de remboursement envoyée.');
             this.fetchOrders();

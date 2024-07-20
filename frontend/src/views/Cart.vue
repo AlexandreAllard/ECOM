@@ -1,114 +1,134 @@
 <template>
-  <div class="max-w-4xl mx-auto p-4">
-    <h1 class="text-2xl font-bold text-center mb-4">Votre Panier</h1>
-    <div v-if="cart && cart.items.length > 0">
-      <ul class="space-y-4">
-        <li v-for="item in cart.items" :key="item.id" class="flex justify-between items-center bg-white p-4 rounded-lg shadow">
-          <span>{{ item.product.name }} - {{ item.quantity }} x {{ item.product.price }} €</span>
-          <div>
-            <button @click="openQuantityModal(item)" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded mr-2">Modifier la quantité</button>
-            <button @click="confirmRemoval(item.id)" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded">Supprimer</button>
-          </div>
-        </li>
-      </ul>
-      <div class="text-right font-bold mt-4">Total: {{ total }} €</div>
-      <div class="mt-4 flex justify-end">
-        <router-link to="/payment" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Procéder au paiement</router-link>
-      </div>
-    </div>
-    <div v-else class="text-center mt-4">
-      <p>Votre panier est vide.</p>
+  <div class="max-w-7xl mx-auto p-6">
+    <h2 class="text-2xl font-bold mb-4">Votre Panier</h2>
+
+    <div v-if="isLoading" class="mt-4">
+      Chargement du panier...
     </div>
 
-    <div v-if="showQuantityModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-center">
-      <div class="bg-white p-6 rounded shadow-lg">
-        <h2 class="font-bold text-lg mb-4">Modifier la quantité</h2>
-        <p class="mb-4">Modifier la quantité pour : {{ currentItem.product.name }}</p>
-        <div class="flex items-center justify-between">
-          <input type="number" v-model.number="currentItem.quantity" min="1" class="border-2 border-gray-300 rounded px-2 py-1">
-          <button @click="updateItem(currentItem.id, currentItem.quantity)" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-4 rounded ml-2">Enregistrer</button>
-          <button @click="showQuantityModal = false" class="ml-4 bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-4 rounded">Annuler</button>
-        </div>
-      </div>
+    <div v-else-if="cart.items.length === 0" class="mt-4">
+      Votre panier est vide.
     </div>
 
-    <div v-if="showModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-center">
-      <div class="bg-white p-6 rounded shadow-lg">
-        <h2 class="font-bold text-lg mb-4">Confirmer la suppression</h2>
-        <p class="mb-4">Voulez-vous vraiment retirer cet article de votre panier?</p>
-        <div class="flex justify-end">
-          <button @click="removeItem" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-4 rounded">Confirmer</button>
-          <button @click="showModal = false" class="ml-4 bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-4 rounded">Annuler</button>
-        </div>
+    <div v-else>
+      <table class="min-w-full leading-normal">
+        <thead>
+        <tr>
+          <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            Produit
+          </th>
+          <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            Quantité
+          </th>
+          <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            Prix
+          </th>
+          <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            Total
+          </th>
+          <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            Actions
+          </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="item in cart.items" :key="item.id">
+          <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+            {{ item.product.name }}
+          </td>
+          <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+            <input type="number" v-model.number="item.quantity" @change="updateQuantity(item.id, item.quantity)" class="w-16 p-2 border border-gray-300 rounded">
+          </td>
+          <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+            {{ item.product.price }} €
+          </td>
+          <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+            {{ (item.quantity * item.product.price).toFixed(2) }} €
+          </td>
+          <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+            <button @click="removeItem(item.id)" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+              Supprimer
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div class="mt-4 flex justify-between">
+        <button @click="clearCart" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+          Vider le panier
+        </button>
+        <button @click="proceedToPayment" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+          Payer maintenant
+        </button>
       </div>
     </div>
   </div>
 </template>
+
 <script>
 import axios from 'axios';
 
 export default {
-  name: 'Cart',
   data() {
     return {
-      cart: null,
-      showModal: false,
-      showQuantityModal: false,
-      currentItem: null,
-      itemIdToDelete: null,
+      cart: {
+        items: []
+      },
+      isLoading: false
     };
   },
-  computed: {
-    total() {
-      return this.cart.items.reduce((acc, item) => acc + item.quantity * item.product.price, 0).toFixed(2);
-    }
-  },
   methods: {
-    fetchCart() {
-      axios.get('http://localhost:3000/cart', { withCredentials: true })
-          .then(response => {
-            this.cart = response.data;
-          })
-          .catch(error => {
-            console.error('Erreur lors de la récupération du panier:', error);
-          });
+    async fetchCart() {
+      this.isLoading = true;
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/cartss`, { withCredentials: true });
+        this.cart = response.data;
+      } catch (error) {
+        console.error('Erreur lors de la récupération du panier:', error);
+      } finally {
+        this.isLoading = false;
+      }
     },
-    updateItem(itemId, quantity) {
+    async updateQuantity(itemId, quantity) {
       if (quantity < 1) {
-        alert("La quantité doit être au moins 1");
+        alert("La quantité doit être au moins 1.");
         return;
       }
-      axios.patch(`http://localhost:3000/cart/item/${itemId}`, { quantity }, { withCredentials: true })
-          .then(() => {
-            this.showQuantityModal = false;
-            this.fetchCart();
-          })
-          .catch(error => {
-            console.error('Erreur lors de la mise à jour de la quantité:', error);
-            alert("Erreur lors de la mise à jour de la quantité");
-          });
+
+      try {
+        await axios.patch(`${import.meta.env.VITE_API_ENDPOINT}:3000/cartss/item/${itemId}`, { quantity }, { withCredentials: true });
+        this.fetchCart();
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour de la quantité:', error);
+      }
     },
-    openQuantityModal(item) {
-      this.currentItem = { ...item };
-      this.showQuantityModal = true;
+    async removeItem(itemId) {
+      try {
+        await axios.delete(`${import.meta.env.VITE_API_ENDPOINT}:3000/cartss/item/${itemId}`, { withCredentials: true });
+        this.fetchCart();
+      } catch (error) {
+        console.error('Erreur lors de la suppression de l\'article du panier:', error);
+      }
     },
-    confirmRemoval(itemId) {
-      this.itemIdToDelete = itemId;
-      this.showModal = true;
+    async clearCart() {
+      try {
+        await axios.delete(`${import.meta.env.VITE_API_ENDPOINT}:3000/cartss`, { withCredentials: true });
+        this.fetchCart();
+      } catch (error) {
+        console.error('Erreur lors du vidage du panier:', error);
+      }
     },
-    removeItem() {
-      axios.delete(`http://localhost:3000/cart/item/${this.itemIdToDelete}`, { withCredentials: true })
-          .then(() => {
-            this.fetchCart();
-            this.showModal = false;
-          })
-          .catch(error => {
-            console.error("Erreur lors de la suppression de l'article:", error);
-          });
+    proceedToPayment() {
+      this.$router.push('/payment');
     }
   },
-  mounted() {
+  created() {
     this.fetchCart();
   }
-}
+};
 </script>
+
+<style scoped>
+/* Ajoutez ici vos styles personnalisés */
+</style>

@@ -66,7 +66,7 @@ import { useForm } from '../../composables/useForm';
 import { z } from 'zod';
 
 const userId = localStorage.getItem('id');
-const apiUrl = `${import.meta.env.VITE_API_ENDPOINT}:3000/users/${userId}`;
+const apiUrl = `${import.meta.env.VITE_API_ENDPOINT}:3000/userss/${userId}`;
 
 const user = ref({
   id: null,
@@ -109,7 +109,7 @@ const {formData, errors, isLoading, serverError, handleSubmit} = useForm(
 const updateProfile = async () => {
   try {
     const data = await handleSubmit();
-    if (data) { // Check if handleSubmit successfully returned data
+    if (data) {
       Object.assign(user.value, formData);
       confirmationMessage.value = 'Profil mis à jour avec succès.';
       setTimeout(() => confirmationMessage.value = '', 3000);

@@ -31,7 +31,7 @@ export default {
   methods: {
     fetchSubscriptions() {
       this.isLoading = true;
-      axios.get('http://localhost:3000/subscriptionss', { withCredentials: true })
+      axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/subscriptionss`, { withCredentials: true })
           .then(response => {
             this.subscriptions = response.data;
           })
@@ -43,7 +43,7 @@ export default {
           });
     },
     deleteSubscription(id) {
-      axios.delete(`http://localhost:3000/subscriptionss/${id}`, { withCredentials: true })
+      axios.delete(`${import.meta.env.VITE_API_ENDPOINT}:3000/subscriptionss/${id}`, { withCredentials: true })
           .then(() => {
             this.subscriptions = this.subscriptions.filter(subscription => subscription.id !== id);
             alert('Subscription deleted successfully.');

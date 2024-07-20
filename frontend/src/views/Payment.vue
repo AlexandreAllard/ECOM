@@ -28,7 +28,7 @@ export default {
   methods: {
     async fetchClientSecret() {
       try {
-        const response = await axios.post('http://localhost:3000/payment/create-payment-intent', { address: this.address }, { withCredentials: true });
+        const response = await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/payment/create-payment-intent`, { address: this.address }, { withCredentials: true });
         this.clientSecret = response.data.clientSecret;
         if (this.clientSecret) {
           this.initializeStripeElement();

@@ -61,7 +61,7 @@ export default {
   methods: {
     fetchAdjustments() {
       this.isLoading = true;
-      axios.get(`http://localhost:3000/stocks/product/${this.product.id}`, { withCredentials: true })
+      axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/stocks/product/${this.product.id}`, { withCredentials: true })
           .then(response => {
             this.adjustments = response.data;
           })

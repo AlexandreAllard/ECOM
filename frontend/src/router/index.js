@@ -8,11 +8,6 @@ const routes = [
         component: () => import('../views/Home.vue')
     },
     {
-        path: '/login',
-        name: 'Login',
-        component: () => import('../views/Login.vue')
-    },
-    {
         path: '/profile',
         name: 'Profile',
         component: () => import('../views/Profile.vue'),
@@ -42,34 +37,49 @@ const routes = [
                 path: 'products',
                 name: 'AdminProducts',
                 component: () => import('../views/admin/AdminProducts.vue')
-            },
-            {
-                path: 'orders',
-                name: 'AdminOrders',
-                component: () => import('../views/admin/AdminOrders.vue')
             }
         ]
     },
     {
-        path: '/activate/:token',
-        name: 'ActivateAccount',
-        component: () => import('../views/ActivateAccount.vue')
+        path: '/auth',
+        component: () => import('../views/authentication/Auth.vue'),
+        children: [
+            {
+                path: 'activate/:token',
+                name: 'ActivateAccount',
+                component: () => import('../views/authentication/ActivateAccount.vue')
+            },
+            {
+                path:'resend-verification',
+                name: 'ResendVerification',
+                component: () => import('../views/authentication/ResendVerification.vue')
+            },
+            {
+                path:'reset-password-request',
+                name: 'ResetPasswordRequest',
+                component: () => import('../views/authentication/RequestResetPassword.vue')
+            },
+            {
+                path:'reset-password/:token',
+                name: 'ResetPassword',
+                component: () => import('../views/authentication/ResetPassword.vue')
+            },
+            {
+                path:'register',
+                name: 'Register',
+                component: () => import('../views/authentication/Register.vue'),
+            },
+            {
+                path: 'login',
+                name: 'Login',
+                component: () => import('../views/authentication/LoginNew.vue')
+            },
+        ]
     },
-    {
-        path:'/resend-verification',
-        name: 'ResendVerification',
-        component: () => import('../views/ResendVerification.vue')
-    },
-    {
-        path:'/reset-password-request',
-        name: 'ResetPasswordRequest',
-        component: () => import('../views/RequestResetPassword.vue')
-    },
-    {
-        path:'/reset-password/:token',
-        name: 'ResetPassword',
-        component: () => import('../views/ResetPassword.vue')
-    },
+
+
+
+
     {
         path: '/cart',
         name: 'Cart',
@@ -79,23 +89,33 @@ const routes = [
     {
         path: '/product/:id',
         name: 'ProductDetails',
-        component: () => import('../views/ProductDetails2.vue')
+        component: () => import('../views/ProductDetails.vue')
     },
     {
-        path: '/stock',
-        component: () => import('../views/stock/Stock.vue'),
+        path: '/management',
+        component: () => import('../views/management/Management.vue'),
         meta: {requiresAuth: true, requiresRole: ['storekeeper','admin']},
         children: [
             {
-                path: 'history',
+                path: 'stock-history',
                 name: 'StockHistory',
-                component: () => import('../views/stock/StockHistory.vue')
+                component: () => import('../views/management/StockHistory.vue')
             },
             {
-                path: 'management',
+                path: 'stock',
                 name: 'StockManagement',
-                component: () => import('../views/stock/StockManagement.vue')
-            }
+                component: () => import('../views/management/StockManagement.vue')
+            },
+            {
+                path:'order',
+                name: 'OrderManagement',
+                component: () => import('../views/management/OrderManagement.vue'),
+            },
+            {
+                path:'delivery',
+                name: 'DeliveryManagement',
+                component: () => import('../views/management/DeliveryManagement.vue'),
+            },
         ]
     },
     {
@@ -107,71 +127,6 @@ const routes = [
         path:'/payment-success',
         name: 'PaymentSuccess',
         component: () => import('../views/PaymentSuccess.vue'),
-    },
-    {
-        path:'/orders',
-        name: 'Orders',
-        component: () => import('../views/Orders.vue'),
-    },
-    {
-        path:'/register',
-        name: 'Register',
-        component: () => import('../views/Register.vue'),
-    },
-    {
-        path:'/loginnew',
-        name: 'LoginNew',
-        component: () => import('../views/LoginNew.vue'),
-    },
-    {
-        path:'/profilenew',
-        name: 'ProfileNew',
-        component: () => import('../views/ProfileNew.vue'),
-    },
-    {
-        path:'/adminusers',
-        name: 'AdminUsers',
-        component: () => import('../views/AdminUsers.vue'),
-    },
-    {
-        path:'/admincategories',
-        name: 'AdminCategories',
-        component: () => import('../views/AdminCategories.vue'),
-    },
-    {
-        path:'/adminproducts',
-        name: 'AdminProducts',
-        component: () => import('../views/AdminProducts.vue'),
-    },
-    {
-        path:'/stockmanagement',
-        name: 'StockManagement',
-        component: () => import('../views/StockManagement.vue'),
-    },
-    {
-        path:'/stockhistory',
-        name: 'StockHistory',
-        component: () => import('../views/StockHistory.vue'),
-    },
-    {
-        path:'/ordermanagement',
-        name: 'OrderManagement',
-        component: () => import('../views/OrderManagement.vue'),
-    },
-    {
-        path:'/deliverymanagement',
-        name: 'DeliveryManagement',
-        component: () => import('../views/DeliveryManagement.vue'),
-    },
-    {
-        path:'/productss',
-        name: 'Productss',
-        component: () => import('../views/Productss.vue'),
-    },
-    {
-        path:'/cartss',
-        name: 'Cart',
-        component: () => import('../views/Carts.vue'),
     },
     {
         path:'/categories',
