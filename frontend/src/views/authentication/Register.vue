@@ -35,10 +35,16 @@
                  :class="{'border-red-500': errors.password && touched.password}">
           <p v-if="errors.password && touched.password" class="mt-2 text-sm text-red-600">{{ errors.password }}</p>
         </div>
+        <div class="flex items-center">
+          <input type="checkbox" v-model="acceptTerms" id="acceptTerms" class="mr-2">
+          <label for="acceptTerms" class="text-sm text-gray-700">
+            J'accepte les <router-link to="/cgv" class="text-black hover:underline">CGV/CGU</router-link> et les <router-link to="/mentions-legales" class="text-black hover:underline">Mentions légales</router-link>
+          </label>
+        </div>
         <div>
-          <button type="submit" :disabled="isLoading"
+          <button type="submit" :disabled="isLoading || !acceptTerms"
                   class="block w-full px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-gray-800 focus:bg-gray-900 focus:outline-none"
-                  :class="{'opacity-50': isLoading}">
+                  :class="{'opacity-50': isLoading || !acceptTerms}">
             S'inscrire
           </button>
         </div>
@@ -61,7 +67,12 @@ const schema = z.object({
   firstname: z.string().nonempty({message: "Le prénom est requis"}),
   lastname: z.string().nonempty({message: "Le nom est requis"}),
   email: z.string().email({message: "Adresse email invalide"}).nonempty({message: "L'email est requis"}),
-  password: z.string().min(6, {message: "Le mot de passe doit contenir au moins 6 caractères"})
+  password: z.string()
+      .min(12, {message: "Le mot de passe doit contenir au moins 12 caractères"})
+      .regex(/[a-z]/, {message: "Le mot de passe doit contenir au moins une lettre minuscule"})
+      .regex(/[A-Z]/, {message: "Le mot de passe doit contenir au moins une lettre majuscule"})
+      .regex(/[0-9]/, {message: "Le mot de passe doit contenir au moins un chiffre"})
+      .regex(/[^a-zA-Z0-9]/, {message: "Le mot de passe doit contenir au moins un symbole"})
 });
 
 const {formData, errors, isLoading, serverError, handleSubmit: baseHandleSubmit} = useForm({
@@ -77,6 +88,8 @@ const touched = ref({
   email: false,
   password: false,
 });
+
+const acceptTerms = ref(false);
 
 const clearError = (field) => {
   touched.value[field] = true;

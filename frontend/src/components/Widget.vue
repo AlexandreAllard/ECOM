@@ -21,7 +21,6 @@ const props = defineProps({
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   height: 100%;
   display: flex;

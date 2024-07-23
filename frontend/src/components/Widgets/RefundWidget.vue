@@ -1,8 +1,8 @@
 <template>
   <div class="widget">
-    <div class="header">Commandes avec demande de remboursement</div>
+    <div class="header">Remboursement</div>
     <div class="content">
-      <p>{{ refundCount }} commandes ont demandé un remboursement.</p>
+      <p>{{ refundCount }}</p>
     </div>
   </div>
 </template>
@@ -29,9 +29,6 @@ onMounted(fetchRefundCount);
 <style scoped>
 .widget {
   background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   height: 100%;
   width: 100%;
@@ -41,6 +38,7 @@ onMounted(fetchRefundCount);
   align-items: center;
   box-sizing: border-box;
   overflow: hidden;
+  padding : 0 !important;
 }
 
 .header {
@@ -48,11 +46,23 @@ onMounted(fetchRefundCount);
   margin-bottom: 10px;
   text-align: center;
   width: 100%;
+  padding : 0 !important;
+
+
 }
 
 .content {
-  font-size: 14px;
+  font-size: 8px;
   text-align: center;
   width: 100%;
+  padding : 0 !important;
+
+}
+
+p {
+  font-size: 16px;
+  font-weight: bold;
+  padding : 0 !important;
+  color: #f00;
 }
 </style>

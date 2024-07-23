@@ -5,12 +5,13 @@
         <router-link class="text-xl font-semibold tracking-widest uppercase hover:text-gray-400" to="/">MECASCRAP</router-link>
         <router-link v-if="!isLoggedIn" class="hidden md:inline-block nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/auth/login">Connexion</router-link>
         <router-link v-if="!isLoggedIn" class="hidden md:inline-block nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/auth/register">Inscription</router-link>
-        <router-link v-if="isLoggedIn" class="hidden md:inline-block nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/produits">Produits</router-link>
+        <router-link class="hidden md:inline-block nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/produits">Produits</router-link>
+        <router-link class="hidden md:inline-block nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/categories">Categories</router-link>
         <router-link v-if="isLoggedIn" class="hidden md:inline-block nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/cart">Panier</router-link>
       </div>
       <div class="flex items-center space-x-4">
-        <div v-if="role === 'admin'" class="hidden md:inline-block">
-          <router-link class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/admin">Management</router-link>
+        <div v-if="role === 'admin' || role === 'storekeeper'" class="hidden md:inline-block">
+          <router-link class="nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/management/orders">Management</router-link>
         </div>
         <router-link v-if="isLoggedIn" class="hidden md:inline-block nav-link py-2 px-4 hover:bg-gray-700 rounded" to="/profile">Profile</router-link>
         <button v-if="isLoggedIn" class="logout-button py-2 px-4 bg-red-600 hover:bg-red-700 rounded" @click="logout">Déconnexion</button>

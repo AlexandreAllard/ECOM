@@ -51,8 +51,9 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const schema = z.object({
-  email: z.string().email({ message: "Adresse e-mail invalide" }).nonempty({message: "Email obligatoire"}),
-  password: z.string().min(6, {message: "Le mot de passe est d'au moins 6 caractères"})
+  email: z.string().email({ message: "Adresse e-mail invalide" }).nonempty({ message: "Email obligatoire" }),
+  password: z.string()
+      .min(6, { message: "Le mot de passe doit contenir au moins 12 caractères" })
 });
 
 const {formData, errors, isLoading, handleSubmit: baseHandleSubmit} = useForm({
