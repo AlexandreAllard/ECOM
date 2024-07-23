@@ -8,11 +8,12 @@ export function useForm(initialValues, schema, submitUrl, method = 'post') {
     const isLoading = ref(false);
     const serverError = ref(null);
     const isSuccess = ref(false);
+    const touched = reactive({});
 
     const validate = () => {
+        Object.keys(errors).forEach(key => errors[key] = null);
         try {
             schema.parse(formData);
-            Object.keys(errors).forEach(key => errors[key] = null);
         } catch (e) {
             e.errors.forEach(error => {
                 if (error.path[0] !== undefined) {
@@ -20,6 +21,10 @@ export function useForm(initialValues, schema, submitUrl, method = 'post') {
                 }
             });
         }
+    };
+
+    const clearError = (field) => {
+        errors[field] = null;
     };
 
     watchEffect(() => {
@@ -53,5 +58,5 @@ export function useForm(initialValues, schema, submitUrl, method = 'post') {
         }
     };
 
-    return { formData, errors, isLoading, serverError, isSuccess, handleSubmit };
+    return { formData, errors, isLoading, serverError, isSuccess, handleSubmit, clearError, touched };
 }

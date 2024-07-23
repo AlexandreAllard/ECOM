@@ -37,6 +37,16 @@ const routes = [
                 path: 'products',
                 name: 'AdminProducts',
                 component: () => import('../views/admin/AdminProducts.vue')
+            },
+            {
+                path:'cgv',
+                name: 'AdminCGV',
+                component: () => import('../views/admin/AdminCGV.vue'),
+            },
+            {
+                path:'mentions-legales',
+                name: 'AdminMentionsLegales',
+                component: () => import('../views/admin/AdminMentionsLegales.vue'),
             }
         ]
     },
@@ -76,10 +86,6 @@ const routes = [
             },
         ]
     },
-
-
-
-
     {
         path: '/cart',
         name: 'Cart',
@@ -132,6 +138,16 @@ const routes = [
         path:'/categories',
         name: 'Categories',
         component: () => import('../views/Categories.vue'),
+    },
+    {
+        path:'/cgv',
+        name: 'CGV',
+        component: () => import('../views/CGV.vue'),
+    },
+    {
+        path:'/mentions-legales',
+        name: 'MentionsLegales',
+        component: () => import('../views/MentionsLegales.vue'),
     }
 
 ];

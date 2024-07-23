@@ -54,7 +54,7 @@ export default {
     },
     async subscribeToCategory(categoryId) {
       try {
-        await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/subscriptions`, {
+        await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/subscriptionss`, {
           targetId: categoryId,
           type: 'new_product'
         }, { withCredentials: true });

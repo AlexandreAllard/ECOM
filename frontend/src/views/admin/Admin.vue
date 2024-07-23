@@ -16,15 +16,18 @@
       </div>
     </div>-->
   </div>
+  <AdminGrid/>
   <router-view></router-view>
 </template>
 
 <script>
 import DataViz from '../../components/DataViz.vue';
 import AdminSidebar from "../../components/AdminSidebar.vue";
+import AdminGrid from "../../components/AdminGrid.vue";
 
 export default {
   components: {
+    AdminGrid,
     AdminSidebar,
     DataViz
   },

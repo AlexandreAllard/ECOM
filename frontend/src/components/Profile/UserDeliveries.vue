@@ -37,7 +37,7 @@ export default {
   methods: {
     fetchDeliveries() {
       this.isLoading = true;
-      axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/deliveriess/user/${id}`, { withCredentials: true })
+      axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/deliveriess?userId=${id}`, { withCredentials: true })
           .then(response => {
             this.deliveries = response.data;
           })
@@ -66,7 +66,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-/* You can add custom styles here if needed */
-</style>

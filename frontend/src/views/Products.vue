@@ -2,16 +2,16 @@
   <div class="max-w-7xl mx-auto p-6">
     <h2 class="text-2xl font-bold mb-4">Produits</h2>
 
-    <div class="mb-4">
+    <div class="mb-4 flex flex-wrap gap-4">
       <input
           v-model="searchQuery"
           @input="updateFilters"
           type="text"
           placeholder="Rechercher des produits..."
-          class="w-full p-2 border border-gray-300 rounded mb-2"
+          class="flex-1 p-2 border border-gray-300 rounded"
       />
 
-      <select v-model="selectedCategory" @change="updateFilters" class="w-full p-2 border border-gray-300 rounded mb-2">
+      <select v-model="selectedCategory" @change="updateFilters" class="flex-1 p-2 border border-gray-300 rounded">
         <option value="">Toutes les catégories</option>
         <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
       </select>
@@ -21,7 +21,7 @@
           @input="updateFilters"
           type="number"
           placeholder="Prix minimum"
-          class="w-full p-2 border border-gray-300 rounded mb-2"
+          class="flex-1 p-2 border border-gray-300 rounded"
       />
 
       <input
@@ -29,7 +29,7 @@
           @input="updateFilters"
           type="number"
           placeholder="Prix maximum"
-          class="w-full p-2 border border-gray-300 rounded mb-2"
+          class="flex-1 p-2 border border-gray-300 rounded"
       />
 
       <input
@@ -37,10 +37,10 @@
           @input="updateFilters"
           type="text"
           placeholder="Marque"
-          class="w-full p-2 border border-gray-300 rounded mb-2"
+          class="flex-1 p-2 border border-gray-300 rounded"
       />
 
-      <select v-model="inStock" @change="updateFilters" class="w-full p-2 border border-gray-300 rounded mb-2">
+      <select v-model="inStock" @change="updateFilters" class="flex-1 p-2 border border-gray-300 rounded">
         <option value="">Tous</option>
         <option value="true">En stock</option>
         <option value="false">Hors stock</option>
@@ -53,7 +53,7 @@
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       <div v-for="product in filteredProducts" :key="product.id" class="bg-white p-4 rounded shadow cursor-pointer" @click="viewProductDetails(product.id)">
-        <img :src="product.imageUrl" alt="" class="w-full h-48 object-cover mb-4">
+        <img :src="product.imageUrl" alt="" class="w-full h-48 object-cover mb-4 rounded">
         <h3 class="text-lg font-bold mb-2">{{ product.name }}</h3>
         <p class="text-gray-600 mb-2">{{ product.description }}</p>
         <p class="text-xl font-semibold mb-4">{{ product.price }} €</p>
@@ -104,7 +104,7 @@ export default {
       }
 
       if (this.brand) {
-        filtered = filtered.filter(product => product.brand.toLowerCase().includes(this.brand.toLowerCase()));
+        filtered = filtered.filter(product => product.brand && product.brand.toLowerCase().includes(this.brand.toLowerCase()));
       }
 
       if (this.inStock !== '') {
@@ -206,5 +206,3 @@ export default {
   cursor: pointer;
 }
 </style>
-
-

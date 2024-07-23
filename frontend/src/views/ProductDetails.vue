@@ -57,7 +57,7 @@ export default {
     },
     async subscribeToProduct(type) {
       try {
-        await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/subscriptions`, {
+        await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/subscriptionss`, {
           targetId: this.product.id,
           type
         }, { withCredentials: true });
@@ -73,7 +73,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-/* Ajoutez ici vos styles personnalisés */
-</style>

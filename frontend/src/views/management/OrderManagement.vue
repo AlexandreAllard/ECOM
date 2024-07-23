@@ -81,7 +81,6 @@ export default {
         const ordersResponse = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/orderss`, { withCredentials: true });
         orders.value = ordersResponse.data;
 
-        // Fetch user emails
         await fetchUserEmails(orders.value);
       } catch (error) {
         console.error("Erreur lors de la récupération des commandes:", error);
@@ -95,7 +94,7 @@ export default {
 
       for (const userId of userIds) {
         try {
-          const userResponse = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/users/${userId}`, { withCredentials: true });
+          const userResponse = await axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/userss/${userId}`, { withCredentials: true });
           userEmails[userId] = userResponse.data.email;
         } catch (error) {
           console.error(`Erreur lors de la récupération de l'email pour l'utilisateur ${userId}:`, error);
@@ -106,9 +105,9 @@ export default {
 
     const refundOrder = async (orderId) => {
       try {
-        await axios.post(`${import.meta.env.VITE_API_ENDPOINT}:3000/orderss/refund/${orderId}`, {}, { withCredentials: true });
+        await axios.patch(`${import.meta.env.VITE_API_ENDPOINT}:3000/orderss/refund/${orderId}`, {}, { withCredentials: true });
         alert('Commande remboursée avec succès.');
-        fetchOrders(); // Rafraîchir la liste des commandes
+        fetchOrders();
       } catch (error) {
         console.error("Erreur lors du remboursement de la commande:", error);
         alert('Échec du remboursement de la commande.');
@@ -126,7 +125,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-/* Ajoutez ici vos styles personnalisés */
-</style>

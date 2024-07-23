@@ -60,7 +60,7 @@ export default {
       axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/stocks`, { withCredentials: true })
           .then(response => {
             this.adjustments = response.data;
-            return axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/products`, { withCredentials: true });
+            return axios.get(`${import.meta.env.VITE_API_ENDPOINT}:3000/productss`, { withCredentials: true });
           })
           .then(response => {
             this.products = response.data;
@@ -82,7 +82,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-/* Ajoutez ici vos styles personnalisés */
-</style>

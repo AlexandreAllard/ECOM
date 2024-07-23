@@ -72,10 +72,10 @@ const user = ref({
   id: null,
   firstname: '',
   lastname: '',
-  email: '',
-  role: ''
+  email: ''
 });
 
+const originalUserData = ref({});
 const showModal = ref(false);
 const profileFields = ['firstname', 'lastname', 'email'];
 const confirmationMessage = ref('');
@@ -88,6 +88,7 @@ const fetchUser = async () => {
   try {
     const response = await axios.get(apiUrl, {withCredentials: true});
     Object.assign(user.value, response.data);
+    Object.assign(originalUserData.value, response.data);
   } catch (error) {
     console.error('Erreur lors de la récupération des données de l\'utilisateur :', error);
   }
@@ -107,17 +108,26 @@ const {formData, errors, isLoading, serverError, handleSubmit} = useForm(
 );
 
 const updateProfile = async () => {
-  try {
-    const data = await handleSubmit();
-    if (data) {
-      Object.assign(user.value, formData);
-      confirmationMessage.value = 'Profil mis à jour avec succès.';
-      setTimeout(() => confirmationMessage.value = '', 3000);
-      closeModal();
+  const updatedData = {};
+  Object.keys(formData).forEach(key => {
+    if (formData[key] !== originalUserData.value[key]) {
+      updatedData[key] = formData[key];
     }
-  } catch (error) {
-    console.error('Erreur lors de la mise à jour du profil :', error);
-    serverError.value = 'Erreur lors de la mise à jour du profil';
+  });
+
+  if (Object.keys(updatedData).length > 0) {
+    try {
+      const data = await handleSubmit(updatedData);
+      if (data) {
+        Object.assign(user.value, formData);
+        confirmationMessage.value = 'Profil mis à jour avec succès.';
+        setTimeout(() => confirmationMessage.value = '', 3000);
+        closeModal();
+      }
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du profil :', error);
+      serverError.value = 'Erreur lors de la mise à jour du profil';
+    }
   }
 };
 
