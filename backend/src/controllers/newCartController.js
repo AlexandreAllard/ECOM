@@ -23,16 +23,18 @@ exports.getCart = async (req, res) => {
 };
 
 exports.addToCart = async (req, res) => {
-    if (req.body.quantity < 1) {
+    if (!req.body.quantity || req.body.quantity < 1) {
         return res.sendStatus(400);
     }
 
     try {
-        const cart = await Cart.findOne({ where: { userId: req.user.id } });
-
-        if (!cart) {
-            return res.sendStatus(404);
+        if (!req.user || !req.user.id) {
+            return res.sendStatus(401);
         }
+
+        const [cart, created] = await Cart.findOrCreate({
+            where: { userId: req.user.id }
+        });
 
         const product = await Product.findByPk(req.params.productId);
         if (!product) {
@@ -43,12 +45,12 @@ exports.addToCart = async (req, res) => {
             return res.sendStatus(400);
         }
 
-        const [item, created] = await CartItem.findOrCreate({
+        const [item, itemCreated] = await CartItem.findOrCreate({
             where: { productId: req.params.productId, cartId: cart.id },
             defaults: { quantity: req.body.quantity }
         });
 
-        if (!created) {
+        if (!itemCreated) {
             const newQuantity = item.quantity + req.body.quantity;
             if (product.stock < newQuantity) {
                 return res.sendStatus(400);
@@ -60,6 +62,7 @@ exports.addToCart = async (req, res) => {
 
         res.sendStatus(201);
     } catch (error) {
+        console.error("Error adding to cart:", error);
         res.sendStatus(500);
     }
 };

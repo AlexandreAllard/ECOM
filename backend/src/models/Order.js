@@ -1,4 +1,5 @@
 const { DataTypes, Model } = require('sequelize');
+const OrderMongo = require('./OrderMongo');
 
 module.exports = (sequelize) => {
     class Order extends Model {}
@@ -26,7 +27,30 @@ module.exports = (sequelize) => {
     }, {
         sequelize,
         modelName: 'Order',
-        tableName: 'orders'
+        tableName: 'orders',
+        hooks: {
+            afterCreate: async (order, options) => {
+                const orderMongo = new OrderMongo({
+                    _id: order.id,
+                    userId: order.userId,
+                    total: order.total,
+                    status: order.status,
+                    paymentIntentId: order.paymentIntentId,
+                });
+                await orderMongo.save();
+            },
+            afterUpdate: async (order, options) => {
+                await OrderMongo.findByIdAndUpdate(order.id, {
+                    userId: order.userId,
+                    total: order.total,
+                    status: order.status,
+                    paymentIntentId: order.paymentIntentId,
+                });
+            },
+            afterDestroy: async (order, options) => {
+                await OrderMongo.findByIdAndDelete(order.id);
+            },
+        }
     });
 
     return Order;

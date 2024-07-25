@@ -1,8 +1,23 @@
 const {Delivery, Order, User} = require('../models');
 
 exports.getDeliveries = async (req, res) => {
+    let filters = {};
+
+    if (req.query.userId && req.user.role === 'admin' && req.user.role === 'storekeeper' ) {
+        filters.userId = req.query.userId;
+    } else if (req.user.role !== 'admin' && req.user.role !== 'storekeeper') {
+        filters.userId = req.user.id;
+    }
+
     try {
-        const deliveries = await Delivery.findAll();
+        const deliveries = await Delivery.findAll({
+            include: [{
+                model: Order,
+                as: 'order',
+                where: filters,
+                attributes: ['id', 'userId', 'total', 'status', 'paymentIntentId', 'createdAt', 'updatedAt']
+            }]
+        });
         res.status(200).json(deliveries);
     } catch (error) {
         res.sendStatus(500);

@@ -3,7 +3,7 @@ const resend = new Resend('re_73Fw5gk9_GySuHaVLyPu6Et5Np3f4KNha');
 
 
 async function sendVerificationEmail(userName, verificationToken, userEmail) {
-    const activationLink = `http://localhost:8080/activate/${verificationToken}`;
+    const activationLink = `http://localhost:8080/auth/activate/${verificationToken}`;
     try {
         await resend.emails.send({
             from: 'onboarding@resend.dev',
@@ -73,4 +73,23 @@ async function sendSubscriptionNotificationEmail(firstName, email, subject, mess
     }
 }
 
-module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendLockedWarningEmail, sendSubscriptionNotificationEmail, };
+async function sendUpdatedTermsEmail(users, documentType, documentTitle) {
+    const subject = `Mise à jour des ${documentType}`;
+    const message = `Le document ${documentTitle} a été mis à jour. Veuillez consulter les dernières modifications.`;
+
+    for (const user of users) {
+        try {
+            await resend.emails.send({
+                from: 'contact@mecascrap.com',
+                to: user.email ,
+                subject: subject,
+                text: `Bonjour ${user.firstname},\n\n${message}`,
+            });
+            console.log('Email sent successfully to ' + user.email);
+        } catch (error) {
+            console.error('Failed to send email to ' + user.email, error);
+        }
+    }
+}
+
+module.exports = { sendVerificationEmail, sendPasswordResetEmail, sendLockedWarningEmail, sendSubscriptionNotificationEmail, sendUpdatedTermsEmail };

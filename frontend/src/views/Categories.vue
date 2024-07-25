@@ -49,7 +49,7 @@ export default {
       }
     },
     viewCategoryProducts(categoryId) {
-      const url = `http://localhost:8080/productss?categoryId=${categoryId}`;
+      const url = `https://mecascrap.com/produits?categoryId=${categoryId}`;
       window.location.href = url;
     },
     async subscribeToCategory(categoryId) {

@@ -3,15 +3,26 @@ const emailService = require('../services/emailService');
 
 exports.getSubscriptions = async (req, res) => {
     try {
+        let filters = {};
+
+        if (req.query.userId && req.user.role === 'admin') {
+            filters.userId = req.query.userId;
+        } else if(req.user.role !== 'admin'){
+            filters.userId = req.user.id;
+        }
+
         const subscriptions = await Subscription.findAll({
+            where: filters,
             include: [{
                 model: Product,
                 as: 'product',
                 attributes: ['name', 'description', 'price', 'stock']
             }]
         });
+
         res.status(200).json(subscriptions);
     } catch (error) {
+        console.error("Error fetching subscriptions:", error);
         res.sendStatus(500);
     }
 };
@@ -95,11 +106,11 @@ exports.deleteSubscription = async (req, res) => {
     }
 };
 
-exports.notifyUsers = async (type, targetId, { subject, message }) => {
+exports.notifyUsers = async (type, targetId, {subject, message}) => {
     try {
         const subscriptions = await Subscription.findAll({
-            where: { type, targetId },
-            include: [{ model: User, as: 'user', attributes: ['email', 'firstname'] }]
+            where: {type, targetId},
+            include: [{model: User, as: 'user', attributes: ['email', 'firstname']}]
         });
 
         if (subscriptions.length === 0) {
@@ -107,7 +118,7 @@ exports.notifyUsers = async (type, targetId, { subject, message }) => {
         }
 
         subscriptions.forEach(subscription => {
-            const { user } = subscription;
+            const {user} = subscription;
             if (user) {
                 emailService.sendSubscriptionNotificationEmail(
                     user.firstname,
@@ -119,5 +130,6 @@ exports.notifyUsers = async (type, targetId, { subject, message }) => {
         });
         console.log(`Notifications sent to ${subscriptions.length} users.`);
     } catch (error) {
-        console.error("Error fetching users with specific subscription:", error);}
+        console.error("Error fetching users with specific subscription:", error);
+    }
 };

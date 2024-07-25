@@ -5,8 +5,7 @@ const authMiddleware = require("../middleware/authMiddleware");
 const adminMiddleware = require("../middleware/adminMiddleware");
 const restrictionMiddleware = require("../middleware/restrictionMiddleware");
 
-router.get('/', authMiddleware, adminMiddleware, newSubscriptionController.getSubscriptions);
-router.get('/user/:id', authMiddleware, restrictionMiddleware,  newSubscriptionController.getUserSubscriptions);
+router.get('/', authMiddleware, newSubscriptionController.getSubscriptions);
 router.get('/:id', authMiddleware, newSubscriptionController.getSubscription);
 router.post('/', authMiddleware, newSubscriptionController.createSubscription);
 router.delete('/:id', authMiddleware, newSubscriptionController.deleteSubscription);

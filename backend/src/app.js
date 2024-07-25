@@ -5,15 +5,8 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const db = require('./models');
 
-const userRoutes = require('./routes/user');
-const authRoutes = require('./routes/auth');
-const productRoutes = require('./routes/product');
-const categoryRoutes = require('./routes/category');
-const cartRoutes = require('./routes/cart');
-const subscriptionRoutes = require('./routes/subscription');
+
 const paymentRoutes = require('./routes/payment');
-const orderRoutes = require('./routes/order');
-const deliveryRoutes = require('./routes/delivery');
 const newUserRoutes = require('./routes/newUser');
 const newAuthRoutes = require('./routes/newAuth');
 const newOrderRoutes = require('./routes/newOrder');
@@ -24,6 +17,7 @@ const newPoductRoutes = require('./routes/newProduct');
 const newStockRoutes = require('./routes/newStock');
 const newCartRoutes = require('./routes/newCart');
 const newPaymentRoutes = require('./routes/newPayment');
+const newLegalRoutes = require('./routes/newLegal');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -51,17 +45,9 @@ app.use('/categoriess', newCategoryRoutes);
 app.use('/productss', newPoductRoutes);
 app.use('/stocks', newStockRoutes);
 app.use('/cartss', newCartRoutes)
-
-app.use('/users', userRoutes);
-app.use('/auth', authRoutes);
-app.use('/products', productRoutes);
-app.use('/categories', categoryRoutes);
-app.use('/cart', cartRoutes);
-app.use('/subscriptions', subscriptionRoutes);
 app.use('/payment', paymentRoutes);
-app.use('/orders', orderRoutes);
-app.use('/deliveries', deliveryRoutes);
 app.use('/payments', newPaymentRoutes);
+app.use('/legals', newLegalRoutes);
 
 
 

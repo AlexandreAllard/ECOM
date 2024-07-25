@@ -105,12 +105,16 @@ exports.updateUser = async (req, res, next) => {
         }
 
         if ('role' in req.body && req.user.role !== 'admin') {
-            return res.sendStatus(403);
+            delete req.body.role;
         }
 
         const [affectedRows] = await User.update(req.body, {
             where: {id: req.params.id}
         });
+
+        if (affectedRows === 0) {
+            return res.sendStatus(404);
+        }
 
         res.sendStatus(200);
     } catch (error) {
